@@ -1,30 +1,62 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Navbar, Footer } from "./components";
-import { Home } from "./pages/Home";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Dashboard } from "./pages/Dashboard";
 import { GrammarAssessment } from "./pages/Assessment";
 import { Login, Register } from "./pages/authentication";
-import { useState, useEffect } from "react";
+import { Home } from "./pages/Home";
+import { Navbar, PrivateRoute, LoadingScreen } from "./components";
 
 function App() {
-  const isUserAuthenticated = useState(false);
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsUserAuthenticated(true);
+      } else {
+        setIsUserAuthenticated(false);
+      }
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
+        <Navbar isUserAuthenticated={isUserAuthenticated} />
         <main className="flex-grow container mx-auto px-4 py-8">
           <Routes>
-            {/* SAKSHAM ADD ROUTING FOR THIS PAGES  */}
             <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/assessments" element={<GrammarAssessment />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute isAuthenticated={isUserAuthenticated}>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/assessments"
+              element={
+                <PrivateRoute isAuthenticated={isUserAuthenticated}>
+                  <GrammarAssessment />
+                </PrivateRoute>
+              }
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>
         </main>
-        <Footer />
       </div>
     </Router>
   );

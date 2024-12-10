@@ -3,3 +3,5 @@ export { default as Navbar } from "./Navbar";
 export { default as WaveformVisualizer } from "./WaveformVisualizer";
 export { default as AnimateButton } from "./AnimateButton";
 export { default as MainCard } from "./MainCard";
+export { default as LoadingScreen } from "./LoadingScreen";
+export { default as PrivateRoute } from "./PrivateRoute";
