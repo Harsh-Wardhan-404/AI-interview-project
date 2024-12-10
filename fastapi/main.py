@@ -24,10 +24,10 @@ app.add_middleware(
 # Initialize FeedbackProcessor
 feedback_processor = FeedbackProcessor()
 
-# Add startup event handler
-@app.on_event("startup")
-async def startup_event():
-    await init_db()
+# # Add startup event handler
+# @app.on_event("startup")
+# async def startup_event():
+#     await init_db()
 
 @app.get("/", tags=["root"])
 async def read_root() -> dict:

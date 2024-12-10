@@ -48,7 +48,7 @@ export default function AuthLogin({ isDemo = false }) {
       const { email, password } = values;
       // Call the API function for login
       await loginUser(email, password);
-
+      console.log("Login successful");
       // Redirect to dashboard or any protected page after login
       navigate("/");
     } catch (error) {

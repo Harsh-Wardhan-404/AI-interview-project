@@ -1,5 +1,5 @@
-// frontend/src/components/pages/Dashboard.jsx
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   Home, 
   FileText, 
@@ -13,6 +13,8 @@ import {
 } from 'lucide-react'
 
 function Dashboard() {
+  const navigate = useNavigate()
+
   const sidebarLinks = [
     { icon: <Home size={20} />, label: 'Overview', path: '/dashboard' },
     { icon: <FileText size={20} />, label: 'Reports', path: '/reports' },
@@ -25,7 +27,8 @@ function Dashboard() {
       icon: <Mic className="w-8 h-8" />,
       description: 'Evaluate your spoken English skills with AI-powered analysis',
       color: 'bg-brand-blue',
-      count: '3 Tests Available'
+      count: '3 Tests Available',
+      path: '/assessment/setup'
     },
     {
       title: 'Video Interview',
@@ -49,6 +52,12 @@ function Dashboard() {
       count: '8 Topics'
     }
   ]
+
+  const handleAssessmentClick = (path) => {
+    if (path) {
+      navigate(path)
+    }
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -99,6 +108,7 @@ function Dashboard() {
               <div 
                 key={index}
                 className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleAssessmentClick(assessment.path)}
               >
                 <div className="flex items-start justify-between">
                   <div className={`${assessment.color} p-3 rounded-lg text-white`}>
