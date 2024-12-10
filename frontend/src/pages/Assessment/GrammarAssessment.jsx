@@ -25,6 +25,7 @@ function GrammarAssessment() {
   const [error, setError] = useState(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [assessmentStage, setAssessmentStage] = useState("preview");
+  const [transcribedText, setTranscribedText] = useState(""); // New state for transcribed text
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -84,6 +85,14 @@ function GrammarAssessment() {
       }
 
       const data = await response.json();
+      
+      // Set the transcribed text if successful
+      if (data.status === "success" && data.text) {
+        setTranscribedText(data.text);
+      } else {
+        setError(data.message || "Failed to transcribe audio");
+      }
+
       return data;
     } catch (error) {
       console.error("Upload error:", error);
@@ -98,6 +107,7 @@ function GrammarAssessment() {
 
   const startRecording = async () => {
     setError(null);
+    setTranscribedText(""); // Clear previous transcription
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -185,6 +195,7 @@ function GrammarAssessment() {
       setAssessmentStage("preview");
       setError(null);
       setRecordingDuration(0);
+      setTranscribedText(""); // Clear transcription when moving to next question
     }
   };
 
@@ -193,6 +204,7 @@ function GrammarAssessment() {
     setAssessmentStage("preview");
     setError(null);
     setRecordingDuration(0);
+    setTranscribedText(""); // Clear transcription when resetting
     stopRecording();
   };
 
@@ -298,20 +310,33 @@ function GrammarAssessment() {
               </div>
             )}
 
-          {isRecording && (
-            <motion.button
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={stopRecording}
-              className="absolute -top-3 -right-3 bg-brand-red text-white px-4 py-3 rounded-full shadow-lg hover:bg-brand-red/90 transition-colors flex items-center gap-2 font-medium border-2 border-white"
-            >
-              <VideoOff size={20} />
-              <span>Stop Recording</span>
-            </motion.button>
-          )}
+            {isRecording && (
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={stopRecording}
+                className="absolute -top-3 -right-3 bg-brand-red text-white px-4 py-3 rounded-full shadow-lg hover:bg-brand-red/90 transition-colors flex items-center gap-2 font-medium border-2 border-white"
+              >
+                <VideoOff size={20} />
+                <span>Stop Recording</span>
+              </motion.button>
+            )}
           </div>
+
+          {/* Transcribed Text Display */}
+          {transcribedText && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-6 p-4 bg-white rounded-xl shadow-md border border-brand-blue/10"
+            >
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Transcribed Speech:</h3>
+              <p className="text-gray-800">{transcribedText}</p>
+            </motion.div>
+          )}
 
           {/* Error Message */}
           {error && (
