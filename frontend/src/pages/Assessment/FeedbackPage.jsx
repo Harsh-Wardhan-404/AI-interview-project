@@ -18,10 +18,10 @@ const FeedbackPage = () => {
       <div className="container mx-auto p-6 text-center">
         <p>No feedback data available.</p>
         <button 
-          onClick={() => navigate('/assessments')}
+          onClick={() => navigate('/dashboard')}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Return to Assessment
+          Return to Dashboard
         </button>
       </div>
     );
@@ -129,10 +129,10 @@ const FeedbackPage = () => {
 
       <div className="mt-8 flex justify-center">
         <button 
-          onClick={() => navigate('/assessments')}
+          onClick={() => navigate('/dashboard')}
           className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
-          Return to Assessment
+          Return to Dashboard
         </button>
       </div>
     </div>
