@@ -1,17 +1,35 @@
 import React, { useState, useRef, useEffect } from "react";
-import {Mic,MicOff,ChevronRight,Volume2,Video,VideoOff,Clock,Target,BookOpen,Star,CheckCircle,XCircle,Loader} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Mic,
+  MicOff,
+  ChevronRight,
+  Volume2,
+  Video,
+  VideoOff,
+  Clock,
+  Target,
+  BookOpen,
+  Star,
+  CheckCircle,
+  XCircle,
+  Loader,
+  FileText
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import WaveformVisualizer from "../../components/WaveformVisualizer";
 import VideoPreview from "../../components/VideoPreview";
 
 function GrammarAssessment() {
+  const navigate = useNavigate();
   const [isRecording, setIsRecording] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [assessmentStage, setAssessmentStage] = useState("preview");
-  const [transcribedText, setTranscribedText] = useState(""); // New state for transcribed text
+  const [transcribedText, setTranscribedText] = useState("");
+  const [feedbackData, setFeedbackData] = useState([]);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -47,7 +65,6 @@ function GrammarAssessment() {
     setError(null);
 
     try {
-      // Validate blob
       if (!mediaBlob || mediaBlob.size === 0) {
         throw new Error("No recording data available");
       }
@@ -72,9 +89,34 @@ function GrammarAssessment() {
 
       const data = await response.json();
       
-      // Set the transcribed text if successful
       if (data.status === "success" && data.text) {
         setTranscribedText(data.text);
+        
+        // Get feedback analysis
+        const feedbackResponse = await fetch("http://localhost:8000/analyze-text", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: data.text }),
+        });
+
+        if (!feedbackResponse.ok) {
+          throw new Error("Failed to get feedback analysis");
+        }
+
+        const feedbackResult = await feedbackResponse.json();
+        
+        // Store feedback for current question
+        setFeedbackData(prev => {
+          const newFeedback = [...prev];
+          newFeedback[currentQuestionIndex] = {
+            text: data.text,
+            grammar: feedbackResult.grammar,
+            pronunciation: feedbackResult.pronunciation
+          };
+          return newFeedback;
+        });
       } else {
         setError(data.message || "Failed to transcribe audio");
       }
@@ -93,7 +135,7 @@ function GrammarAssessment() {
 
   const startRecording = async () => {
     setError(null);
-    setTranscribedText(""); // Clear previous transcription
+    setTranscribedText("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -115,10 +157,7 @@ function GrammarAssessment() {
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        // Stop video stream tracks
         stream.getTracks().forEach((track) => track.stop());
-
-        // Create blob from recorded chunks
         const mediaBlob = new Blob(chunksRef.current, { type: "video/webm" });
 
         try {
@@ -156,19 +195,16 @@ function GrammarAssessment() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
 
-      // Ensure we stop all tracks
       if (mediaStream) {
         mediaStream.getTracks().forEach((track) => track.stop());
       }
 
       setIsRecording(false);
 
-      // Clear video source
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
 
-      // Clear timer
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
@@ -181,7 +217,7 @@ function GrammarAssessment() {
       setAssessmentStage("preview");
       setError(null);
       setRecordingDuration(0);
-      setTranscribedText(""); // Clear transcription when moving to next question
+      setTranscribedText("");
     }
   };
 
@@ -190,8 +226,18 @@ function GrammarAssessment() {
     setAssessmentStage("preview");
     setError(null);
     setRecordingDuration(0);
-    setTranscribedText(""); // Clear transcription when resetting
+    setTranscribedText("");
+    setFeedbackData([]);
     stopRecording();
+  };
+
+  const viewFeedback = () => {
+    // Store feedback data in localStorage to access it in the feedback page
+    localStorage.setItem('assessmentFeedback', JSON.stringify({
+      questions,
+      feedback: feedbackData
+    }));
+    navigate('/assessment/feedback');
   };
 
   const formatTime = (seconds) => {
@@ -199,6 +245,8 @@ function GrammarAssessment() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  const isAssessmentComplete = currentQuestionIndex === questions.length - 1 && transcribedText;
 
   return (
     <motion.div
@@ -346,21 +394,34 @@ function GrammarAssessment() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={resetAssessment}
-              className="w-1/3 bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 rounded-xl flex items-center justify-center font-medium shadow-md hover:shadow-lg transition-all"
+              className="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 rounded-xl flex items-center justify-center font-medium shadow-md hover:shadow-lg transition-all"
             >
               Restart
               <XCircle className="ml-2" size={18} />
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={nextQuestion}
-              disabled={currentQuestionIndex === questions.length - 1}
-              className="w-2/3 bg-gradient-to-r from-brand-yellow to-brand-orange text-white py-3 rounded-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg transition-all"
-            >
-              Next Question
-              <ChevronRight className="ml-2" size={18} />
-            </motion.button>
+
+            {isAssessmentComplete ? (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={viewFeedback}
+                className="flex-1 bg-gradient-to-r from-brand-purple to-brand-blue text-white py-3 rounded-xl flex items-center justify-center font-medium shadow-md hover:shadow-lg transition-all"
+              >
+                View Feedback
+                <FileText className="ml-2" size={18} />
+              </motion.button>
+            ) : (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={nextQuestion}
+                disabled={!transcribedText}
+                className="flex-1 bg-gradient-to-r from-brand-yellow to-brand-orange text-white py-3 rounded-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg transition-all"
+              >
+                Next Question
+                <ChevronRight className="ml-2" size={18} />
+              </motion.button>
+            )}
           </motion.div>
         </motion.div>
 
