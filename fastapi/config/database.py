@@ -7,9 +7,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-
-
 MONGODB_URL = "mongodb+srv://vedant22211000:vedant@cluster0.tvr7o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 client = AsyncIOMotorClient(MONGODB_URL)

@@ -1,19 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Mic,
-  MicOff,
-  ChevronRight,
-  Volume2,
-  Video,
-  VideoOff,
-  Clock,
-  Target,
-  BookOpen,
-  Star,
-  CheckCircle,
-  XCircle,
-  Loader,
-} from "lucide-react";
+import {Mic,MicOff,ChevronRight,Volume2,Video,VideoOff,Clock,Target,BookOpen,Star,CheckCircle,XCircle,Loader} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import WaveformVisualizer from "../../components/WaveformVisualizer";
 import VideoPreview from "../../components/VideoPreview";
