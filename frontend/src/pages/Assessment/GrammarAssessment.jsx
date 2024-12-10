@@ -14,7 +14,8 @@ import {
   CheckCircle,
   XCircle,
   Loader,
-  FileText
+  FileText,
+  ArrowLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import WaveformVisualizer from "../../components/WaveformVisualizer";
@@ -30,6 +31,8 @@ function GrammarAssessment() {
   const [assessmentStage, setAssessmentStage] = useState("preview");
   const [transcribedText, setTranscribedText] = useState("");
   const [feedbackData, setFeedbackData] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [setupData, setSetupData] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -39,26 +42,65 @@ function GrammarAssessment() {
 
   const MAX_RECORDING_TIME = 120; // 2 minutes
 
-  const questions = [
-    "Describe your typical daily routine.",
-    "What did you do last weekend?",
-    "What are your plans for the future?",
-    "Tell me about your favorite hobby.",
-  ];
-
   const questionIcons = [
     <Clock key="clock" className="text-brand-blue" size={24} />,
-    <BookOpen key="book" className="text-brand-purple" size={24} />,
-    <Target key="target" className="text-brand-orange" size={24} />,
-    <Star key="star" className="text-brand-yellow" size={24} />,
+    <BookOpen key="book" className="text-brand-blue" size={24} />,
+    <Target key="target" className="text-brand-blue" size={24} />,
+    <Star key="star" className="text-brand-blue" size={24} />
   ];
 
   useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        setIsLoading(true);
+        const storedSetup = localStorage.getItem('assessmentSetup');
+        if (!storedSetup) {
+          navigate('/assessment/setup');
+          return;
+        }
+
+        const parsedSetup = JSON.parse(storedSetup);
+        setSetupData(parsedSetup);
+
+        const response = await fetch('http://localhost:8000/generate-questions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(parsedSetup),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch questions');
+        }
+
+        const data = await response.json();
+        
+        // Ensure we have an array of questions
+        const questionsList = Array.isArray(data.questions) ? data.questions : 
+                            Array.isArray(data) ? data : [];
+        
+        if (questionsList.length === 0) {
+          throw new Error('No questions received from the server');
+        }
+
+        setQuestions(questionsList);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load questions. Please try again.');
+        console.error('Error fetching questions:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchQuestions();
+
     return () => {
       stopRecording();
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [navigate]);
 
   const sendMediaToServer = async (mediaBlob) => {
     setIsLoading(true);
@@ -235,7 +277,8 @@ function GrammarAssessment() {
     // Store feedback data in localStorage to access it in the feedback page
     localStorage.setItem('assessmentFeedback', JSON.stringify({
       questions,
-      feedback: feedbackData
+      feedback: feedbackData,
+      setup: setupData
     }));
     navigate('/assessment/feedback');
   };
@@ -247,6 +290,53 @@ function GrammarAssessment() {
   };
 
   const isAssessmentComplete = currentQuestionIndex === questions.length - 1 && transcribedText;
+
+  if (isLoading && questions.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader className="w-8 h-8 animate-spin text-brand-blue mx-auto mb-4" />
+          <p className="text-gray-600">Loading your assessment questions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && questions.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
+          <XCircle className="w-12 h-12 text-brand-red mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Failed to Load Questions</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/assessment/setup')}
+            className="px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/90 transition-colors"
+          >
+            Return to Setup
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
+          <XCircle className="w-12 h-12 text-brand-red mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">No Questions Available</h2>
+          <p className="text-gray-600 mb-4">Please return to setup and try again.</p>
+          <button
+            onClick={() => navigate('/assessment/setup')}
+            className="px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/90 transition-colors"
+          >
+            Return to Setup
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -282,6 +372,13 @@ function GrammarAssessment() {
                 {currentQuestionIndex + 1}/{questions.length}
               </motion.span>
             </div>
+            <button
+              onClick={() => navigate('/assessment/setup')}
+              className="text-gray-600 hover:text-brand-blue transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={16} />
+              <span className="text-sm">Back to Setup</span>
+            </button>
           </div>
 
           {/* Question Card */}
@@ -293,7 +390,7 @@ function GrammarAssessment() {
             className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-brand-blue/10 relative overflow-hidden"
           >
             <div className="absolute top-4 right-4">
-              {questionIcons[currentQuestionIndex]}
+              {questionIcons[currentQuestionIndex % questionIcons.length]}
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-3 pr-10">
               {questions[currentQuestionIndex]}

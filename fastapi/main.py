@@ -1,12 +1,13 @@
-from fastapi import FastAPI, UploadFile, File, Body
+from fastapi import FastAPI, UploadFile, File, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from routers import users
 from config.database import init_db
 from feedback.feedback_processor import FeedbackProcessor
+from setupGeneration import generate_assessment_questions
 import logging
 import os
 from audioProcessor import process_audio_file
-from typing import Dict
+from typing import Dict, List
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -74,5 +75,19 @@ async def analyze_text(text_data: Dict = Body(...)):
     except Exception as e:
         logger.error(f"Error analyzing text: {str(e)}")
         return {"status": "error", "message": str(e)}
+
+@app.post("/generate-questions")
+async def generate_questions(setup_data: Dict = Body(...)) -> Dict[str, List[str]]:
+    try:
+            
+        questions = await generate_assessment_questions(setup_data)
+        return {"questions": questions}
+        
+    except Exception as e:
+        logger.error(f"Error generating questions: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate questions: {str(e)}"
+        )
 
 app.include_router(users.router, prefix="/api/users", tags=["users"])
