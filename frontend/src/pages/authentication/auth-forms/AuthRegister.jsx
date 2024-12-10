@@ -20,6 +20,7 @@ import * as Yup from "yup";
 import { Formik } from "formik";
 
 // project import
+import { AnimateButton } from "../../../components";
 import {
   strengthColor,
   strengthIndicator,
@@ -35,6 +36,7 @@ export default function AuthRegister() {
   const navigate = useNavigate();
   const [level, setLevel] = useState();
   const [showPassword, setShowPassword] = useState(false);
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -108,11 +110,18 @@ export default function AuthRegister() {
           touched,
           values,
         }) => (
-          <form noValidate onSubmit={handleSubmit}>
+          <form
+            noValidate
+            onSubmit={handleSubmit}
+            style={{ fontFamily: "'Poppins', sans-serif" }} // Custom font family
+          >
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="firstname-signup">
+                  <InputLabel
+                    htmlFor="firstname-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     First Name*
                   </InputLabel>
                   <OutlinedInput
@@ -125,17 +134,27 @@ export default function AuthRegister() {
                     placeholder="John"
                     fullWidth
                     error={Boolean(touched.firstname && errors.firstname)}
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
                   />
                 </Stack>
                 {touched.firstname && errors.firstname && (
-                  <FormHelperText error id="helper-text-firstname-signup">
+                  <FormHelperText
+                    error
+                    id="helper-text-firstname-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     {errors.firstname}
                   </FormHelperText>
                 )}
               </Grid>
               <Grid item xs={12} md={6}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="lastname-signup">Last Name*</InputLabel>
+                  <InputLabel
+                    htmlFor="lastname-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
+                    Last Name*
+                  </InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.lastname && errors.lastname)}
@@ -146,18 +165,27 @@ export default function AuthRegister() {
                     onBlur={handleBlur}
                     onChange={handleChange}
                     placeholder="Doe"
-                    inputProps={{}}
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
                   />
                 </Stack>
                 {touched.lastname && errors.lastname && (
-                  <FormHelperText error id="helper-text-lastname-signup">
+                  <FormHelperText
+                    error
+                    id="helper-text-lastname-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     {errors.lastname}
                   </FormHelperText>
                 )}
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="company-signup">Company</InputLabel>
+                  <InputLabel
+                    htmlFor="company-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
+                    Company
+                  </InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.company && errors.company)}
@@ -167,18 +195,27 @@ export default function AuthRegister() {
                     onBlur={handleBlur}
                     onChange={handleChange}
                     placeholder="Demo Inc."
-                    inputProps={{}}
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
                   />
                 </Stack>
                 {touched.company && errors.company && (
-                  <FormHelperText error id="helper-text-company-signup">
+                  <FormHelperText
+                    error
+                    id="helper-text-company-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     {errors.company}
                   </FormHelperText>
                 )}
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="email-signup">Email Address*</InputLabel>
+                  <InputLabel
+                    htmlFor="email-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
+                    Email Address*
+                  </InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
@@ -189,18 +226,27 @@ export default function AuthRegister() {
                     onBlur={handleBlur}
                     onChange={handleChange}
                     placeholder="demo@company.com"
-                    inputProps={{}}
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
                   />
                 </Stack>
                 {touched.email && errors.email && (
-                  <FormHelperText error id="helper-text-email-signup">
+                  <FormHelperText
+                    error
+                    id="helper-text-email-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     {errors.email}
                   </FormHelperText>
                 )}
               </Grid>
               <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="password-signup">Password</InputLabel>
+                  <InputLabel
+                    htmlFor="password-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
+                    Password
+                  </InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.password && errors.password)}
@@ -231,11 +277,15 @@ export default function AuthRegister() {
                       </InputAdornment>
                     }
                     placeholder="******"
-                    inputProps={{}}
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
                   />
                 </Stack>
                 {touched.password && errors.password && (
-                  <FormHelperText error id="helper-text-password-signup">
+                  <FormHelperText
+                    error
+                    id="helper-text-password-signup"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     {errors.password}
                   </FormHelperText>
                 )}
@@ -252,7 +302,11 @@ export default function AuthRegister() {
                       />
                     </Grid>
                     <Grid item>
-                      <Typography variant="subtitle1" fontSize="0.75rem">
+                      <Typography
+                        variant="subtitle1"
+                        fontSize="0.75rem"
+                        sx={{ fontFamily: "'Poppins', sans-serif" }}
+                      >
                         {level?.label}
                       </Typography>
                     </Grid>
@@ -260,20 +314,38 @@ export default function AuthRegister() {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <Typography variant="body2">
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "'Poppins', sans-serif" }}
+                >
                   By Signing up, you agree to our &nbsp;
-                  <Link variant="subtitle2" component={RouterLink} to="#">
+                  <Link
+                    variant="subtitle2"
+                    component={RouterLink}
+                    to="#"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     Terms of Service
                   </Link>
                   &nbsp; and &nbsp;
-                  <Link variant="subtitle2" component={RouterLink} to="#">
+                  <Link
+                    variant="subtitle2"
+                    component={RouterLink}
+                    to="#"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
                     Privacy Policy
                   </Link>
                 </Typography>
               </Grid>
               {errors.submit && (
                 <Grid item xs={12}>
-                  <FormHelperText error>{errors.submit}</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
+                  >
+                    {errors.submit}
+                  </FormHelperText>
                 </Grid>
               )}
               <Grid item xs={12}>
@@ -286,6 +358,7 @@ export default function AuthRegister() {
                     type="submit"
                     variant="contained"
                     color="primary"
+                    sx={{ fontFamily: "'Poppins', sans-serif" }}
                   >
                     Create Account
                   </Button>

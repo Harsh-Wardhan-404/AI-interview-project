@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-// import loginUser from "api/Authentication/loginUser.js";
 
 // material-ui
 import Button from "@mui/material/Button";
@@ -21,6 +20,9 @@ import Typography from "@mui/material/Typography";
 // third party
 import * as Yup from "yup";
 import { Formik } from "formik";
+
+// project import
+import { AnimateButton } from "../../../components";
 
 // assets
 import EyeOutlined from "@ant-design/icons/EyeOutlined";
@@ -169,13 +171,18 @@ export default function AuthLogin({ isDemo = false }) {
                       />
                     }
                     label={
-                      <Typography variant="h6">Keep me sign in</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }} // Make it less bright
+                      >
+                        Keep me signed in
+                      </Typography>
                     }
                   />
                   <Link
-                    variant="h6"
+                    variant="body2"
                     component={RouterLink}
-                    color="text.primary"
+                    color="primary" // Make it blue
                   >
                     Forgot Password?
                   </Link>

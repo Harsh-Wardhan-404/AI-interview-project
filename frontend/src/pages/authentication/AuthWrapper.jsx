@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 
+import AuthCard from "./AuthCard";
+
 // ==============================|| AUTHENTICATION - WRAPPER ||============================== //
 
 export default function AuthWrapper({ children }) {
@@ -29,9 +31,12 @@ export default function AuthWrapper({ children }) {
                 md: "calc(100vh - 112px)",
               },
             }}
-          ></Grid>
+          >
+            <Grid item>
+              <AuthCard>{children}</AuthCard>
+            </Grid>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sx={{ m: 3, mt: 1 }}></Grid>
       </Grid>
     </Box>
   );
