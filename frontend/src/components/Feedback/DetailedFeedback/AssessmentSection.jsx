@@ -39,6 +39,13 @@ const AssessmentSection = ({ feedback }) => {
       textColor: 'text-brand-blue'
     },
     {
+      title: 'Speech Pauses',
+      content: feedback.pause_count !== undefined,
+      count: feedback.pause_count,
+      bgColor: 'bg-yellow-100',
+      textColor: 'text-yellow-700'
+    },
+    {
       title: 'Vocabulary Assessment',
       content: feedback.vocabulary,
       score: feedback.vocabulary?.vocabulary_score,
@@ -121,6 +128,21 @@ const AssessmentSection = ({ feedback }) => {
     </div>
   );
 
+  const renderPauseContent = (section) => (
+    <div className="mt-2">
+      <p className="text-sm text-gray-700">
+        Detected {section.count} pauses in your speech
+      </p>
+      <p className="text-xs text-gray-600 mt-2">
+        {section.count > 8 
+          ? 'Consider reducing the number of pauses to improve speech fluency'
+          : section.count > 4
+          ? 'Moderate number of pauses - your speech flow is acceptable'
+          : 'Good speech flow with minimal pauses'}
+      </p>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       {sections.map((section, index) => 
@@ -144,11 +166,17 @@ const AssessmentSection = ({ feedback }) => {
                   {section.errorCount} {section.title === 'Grammar Assessment' ? 'mistakes' : 'challenges'}
                 </span>
               )}
+              {section.count !== undefined && (
+                <span className={`${section.bgColor} ${section.textColor} px-2 py-0.5 rounded-full text-xs`}>
+                  {section.count} pauses
+                </span>
+              )}
             </div>
 
             {section.errors && renderErrors(section.errors, section.title === 'Grammar Assessment')}
             {section.title === 'Fluency Assessment' && section.fillerWords && renderFluencyContent(section)}
             {section.title === 'Vocabulary Assessment' && section.advancedWords && renderVocabularyContent(section)}
+            {section.title === 'Speech Pauses' && renderPauseContent(section)}
           </motion.div>
         )
       )}

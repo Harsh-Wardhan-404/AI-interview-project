@@ -42,7 +42,7 @@ app.use((err, req, res, next) => {
 });
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/your-database')
+mongoose.connect("mongodb+srv://aryakadam348:arya@cluster0.awsev.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
