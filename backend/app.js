@@ -46,12 +46,9 @@ app.use((err, req, res, next) => {
 });
 
 // MongoDB connection
-mongoose
-  .connect(
-    "mongodb+srv://aryakadam348:arya@cluster0.awsev.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  )
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+mongoose.connect("mongodb+srv://aryakadam348:arya@cluster0.awsev.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

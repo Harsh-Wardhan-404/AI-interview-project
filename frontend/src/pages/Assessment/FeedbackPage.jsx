@@ -72,8 +72,6 @@ const FeedbackPage = () => {
       );
   
       console.log("Assessment data ready to save:", savedAssessment);
-      // TODO: Save to backend when ready
-  
       alert("Assessment saved successfully!");
     } catch (error) {
       console.error("Error saving assessment:", error);
@@ -123,6 +121,10 @@ const FeedbackPage = () => {
         acc.totalCorrectnessScore += questionFeedback.correctness.score;
         acc.correctnessCount += 1;
       }
+      if (questionFeedback.pause_count !== undefined) {
+        acc.totalPauses += questionFeedback.pause_count;
+        acc.pauseCount += 1;
+      }
     }
     return acc;
   }, { 
@@ -135,7 +137,10 @@ const FeedbackPage = () => {
     totalAdvancedWords: 0,
     vocabularyCount: 0,
     totalCorrectnessScore: 0,
-    correctnessCount: 0
+    correctnessCount: 0,
+    totalPauses: 0,
+    pauseCount: 0,
+    totalQuestions: assessmentData.questions.length
   });
 
   const totalQuestions = assessmentData.questions.length;
@@ -152,13 +157,17 @@ const FeedbackPage = () => {
   const correctnessPerformance = overallStats.correctnessCount > 0
     ? overallStats.totalCorrectnessScore / overallStats.correctnessCount
     : 0;
+  const pausePerformance = overallStats.pauseCount > 0
+    ? Math.max(0, Math.min(100, 100 - (overallStats.totalPauses / overallStats.pauseCount * 10)))
+    : 100;
 
   const overallScore = Math.round(
-    (grammarPerformance * 0.2) +
-    (pronunciationPerformance * 0.2) +
-    (fluencyPerformance * 0.2) +
-    (vocabularyPerformance * 0.2) +
-    (correctnessPerformance * 0.2)
+    (grammarPerformance * 0.166) +
+    (pronunciationPerformance * 0.166) +
+    (fluencyPerformance * 0.166) +
+    (vocabularyPerformance * 0.166) +
+    (correctnessPerformance * 0.166) +
+    (pausePerformance * 0.166)
   );
 
   return (
@@ -184,6 +193,7 @@ const FeedbackPage = () => {
         fluencyPerformance={fluencyPerformance}
         vocabularyPerformance={vocabularyPerformance}
         correctnessPerformance={correctnessPerformance}
+        pausePerformance={pausePerformance}
         showDetailedFeedback={showDetailedFeedback}
         setShowDetailedFeedback={setShowDetailedFeedback}
       />
