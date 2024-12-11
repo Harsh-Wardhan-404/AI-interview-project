@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Home, FileText, Settings, LogOut, Menu } from "lucide-react";
+import { logoutUser } from "../services/logoutUser";
 
 function DashboardLayout() {
   const navigate = useNavigate();
@@ -15,6 +16,16 @@ function DashboardLayout() {
 
   const toggleSidebar = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      alert("Failed to log out. Please try again.");
+    }
   };
 
   return (
@@ -70,6 +81,7 @@ function DashboardLayout() {
           <div className="p-4 border-t">
             <button
               className="flex items-center space-x-3 w-full p-3 rounded-lg transition-colors duration-300 text-gray-600 hover:bg-gray-50 hover:text-brand-red"
+              onClick={handleLogout}
             >
               <LogOut size={20} />
               <span className={!isExpanded ? "hidden" : ""}>Logout</span>
@@ -80,10 +92,10 @@ function DashboardLayout() {
 
       {/* Main Content */}
       <main
-          className={`h-auto flex-1 transition-all duration-300 ${
-            !isExpanded ? "ml-20" : "ml-64"
-          } mt-6`}
-        >
+        className={`h-auto flex-1 transition-all duration-300 ${
+          !isExpanded ? "ml-20" : "ml-64"
+        } mt-6`}
+      >
         <div className="h-[calc(100vh-64px)]">
           <Outlet />
         </div>

@@ -69,7 +69,6 @@ export default function AuthRegister() {
       const userPayload = {
         username: `${firstname} ${lastname}`,
         email: firebaseUser.email,
-        company,
         token: firebaseUser.uid, // Using Firebase UID as token
       };
 
@@ -80,6 +79,7 @@ export default function AuthRegister() {
 
       // Store token in local storage or handle it as needed
       localStorage.setItem("token", user.token);
+      localStorage.setItem("currUser", JSON.stringify(userPayload));
 
       // Navigate to the dashboard after successful registration
       navigate("/dashboard");

@@ -35,7 +35,7 @@ export default function FirebaseSocial() {
           console.log("User successfully stored/retrieved:", user);
           // Store token or perform additional logic as needed
           localStorage.setItem("token", user.token);
-          localStorage.setItem("currUser", userPayload);
+          localStorage.setItem("currUser", JSON.stringify(userPayload));
           navigate("/dashboard");
         }
       }

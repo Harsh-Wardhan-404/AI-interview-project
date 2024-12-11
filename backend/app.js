@@ -30,7 +30,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Routes
 app.use("/upload", uploadRouter);
-app.use("/user", userRouter);
+app.use("/users", userRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the API" });
@@ -47,7 +47,9 @@ app.use((err, req, res, next) => {
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/your-database")
+  .connect(
+    "mongodb+srv://aryakadam348:arya@cluster0.awsev.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  )
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
