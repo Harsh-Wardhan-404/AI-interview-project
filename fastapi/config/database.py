@@ -1,13 +1,15 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 import os
 import logging
 
+# Load environment variables
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-MONGODB_URL = "mongodb+srv://vedant22211000:vedant@cluster0.tvr7o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGODB_URL = os.getenv("MONGODB_URI")
 
 client = AsyncIOMotorClient(MONGODB_URL)
 db = client.fastapi_db

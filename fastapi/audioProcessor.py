@@ -1,15 +1,19 @@
 import os
 from groq import Groq
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 from feedback.pause_count import process_audio_fluency
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize the Groq client with API key
-GROQ_API_KEY = "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"
-client = Groq(api_key=GROQ_API_KEY)
+# Initialize the Groq client with API key from environment variable
+client = Groq(api_key=os.getenv("Grok_API_KEY"))
 
 async def process_audio_file(file_path: str, language: str = "en") -> dict:
     """
