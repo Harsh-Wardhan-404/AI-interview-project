@@ -121,6 +121,7 @@ function DashboardLayout() {
             <motion.button
               whileHover={{ x: 4, color: "#cc0530" }}
               className="flex items-center space-x-3 w-full p-3 rounded-lg transition-colors duration-300 text-gray-600 group"
+              onClick={handleLogout}
             >
               <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
               <span className={!isExpanded ? "hidden" : ""}>Logout</span>
