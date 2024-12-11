@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { Dashboard } from "./pages/Dashboard";
+// import { Dashboard } from "./pages/Dashboard";
+import Layout from "./Dashboard";
 import { GrammarAssessment } from "./pages/Assessment";
 import { Login, Register } from "./pages/authentication";
 import { Home } from "./pages/Home";
@@ -41,7 +42,8 @@ function App() {
               path="/dashboard"
               element={
                 <PrivateRoute isAuthenticated={isUserAuthenticated}>
-                  <Dashboard />
+                  {/* <Dashboard /> */}
+                  <Layout />
                 </PrivateRoute>
               }
             />
