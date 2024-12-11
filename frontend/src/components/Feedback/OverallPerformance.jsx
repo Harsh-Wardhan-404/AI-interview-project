@@ -28,6 +28,9 @@ const OverallPerformance = ({
     return 'Needs Improvement';
   };
 
+  // Calculate pause performance (lower pauses is better)
+  const pausePerformance = Math.max(0, Math.min(100, 100 - (overallStats.totalPauses / overallStats.totalQuestions * 10)));
+
   return (
     <motion.div 
       initial={{ y: 20, opacity: 0 }}
@@ -88,7 +91,7 @@ const OverallPerformance = ({
               {getScoreGrade(overallScore)}
             </div>
             <p className="text-sm text-gray-600">
-              Based on Grammar, Pronunciation, Fluency, Vocabulary, and Answer Correctness
+              Based on Grammar, Pronunciation, Fluency, Vocabulary, Speech Pauses, and Answer Correctness
             </p>
           </div>
         </motion.div>
@@ -99,6 +102,7 @@ const OverallPerformance = ({
             { label: 'Grammar', performance: grammarPerformance, count: overallStats.totalGrammarErrors, unit: 'mistakes' },
             { label: 'Pronunciation', performance: pronunciationPerformance, count: overallStats.totalPronunciationErrors, unit: 'challenges' },
             { label: 'Fluency', performance: fluencyPerformance, count: overallStats.totalFillerWords, unit: 'filler words' },
+            { label: 'Speech Pauses', performance: pausePerformance, count: overallStats.totalPauses, unit: 'pauses' },
             { label: 'Vocabulary', performance: vocabularyPerformance, count: overallStats.totalAdvancedWords, unit: 'advanced words used' },
             { label: 'Answer Correctness', performance: correctnessPerformance, text: 'Based on relevance and completeness' }
           ].map((metric, index) => (
