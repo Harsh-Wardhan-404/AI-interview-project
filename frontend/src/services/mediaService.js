@@ -7,7 +7,7 @@ export const sendMediaToServer = async (mediaBlob, questionIndex) => {
   formData.append(
     "file",
     mediaBlob,
-    `question_${questionIndex}.webm`
+    `question_${questionIndex}.mp4`
   );
   formData.append("questionIndex", questionIndex);
 

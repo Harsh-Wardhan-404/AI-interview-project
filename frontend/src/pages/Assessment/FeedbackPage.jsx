@@ -227,7 +227,7 @@ const FeedbackPage = () => {
         </button>
       </div>
 
-      {/* Rest of the component remains the same */}
+      {/* Detailed Feedback Section */}
       {showDetailedFeedback && (
         <div className="space-y-6">
           {assessmentData.questions.map((question, index) => (
@@ -238,6 +238,22 @@ const FeedbackPage = () => {
                 
                 {assessmentData.feedback[index] ? (
                   <div className="space-y-4">
+                    {/* Video Player Section */}
+                    {assessmentData.feedback[index].videoUrl && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h3 className="font-semibold text-sm mb-2">Your Response Video</h3>
+                        <div className="aspect-video w-full max-w-2xl mx-auto bg-black rounded-lg overflow-hidden">
+                          <video 
+                            src={assessmentData.feedback[index].videoUrl}
+                            controls
+                            className="w-full h-full object-contain"
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="text-gray-600">
                       Your answer: {assessmentData.feedback[index].text}
                     </div>
