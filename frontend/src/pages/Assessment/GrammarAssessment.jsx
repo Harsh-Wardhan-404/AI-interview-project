@@ -1,119 +1,541 @@
-import React, { useState } from "react";
-import { Mic, MicOff, ChevronRight, Volume2 } from "lucide-react";
-import ConversationLayout from "../../layouts/ConversationLayout";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Mic,
+  MicOff,
+  ChevronRight,
+  Volume2,
+  Video,
+  VideoOff,
+  Clock,
+  Target,
+  BookOpen,
+  Star,
+  CheckCircle,
+  XCircle,
+  Loader,
+  FileText,
+  ArrowLeft
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import WaveformVisualizer from "../../components/WaveformVisualizer";
+import VideoPreview from "../../components/VideoPreview";
 
 function GrammarAssessment() {
+  const navigate = useNavigate();
   const [isRecording, setIsRecording] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [assessmentStage, setAssessmentStage] = useState("preview");
+  const [transcribedText, setTranscribedText] = useState("");
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [setupData, setSetupData] = useState(null);
 
-  const questions = [
-    "Describe your typical daily routine.",
-    "What did you do last weekend?",
-    "What are your plans for the future?",
-    "Tell me about your favorite hobby.",
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
+  const timerRef = useRef(null);
+  const [mediaStream, setMediaStream] = useState(null);
+  const videoRef = useRef(null);
+
+  const MAX_RECORDING_TIME = 120; // 2 minutes
+
+  const questionIcons = [
+    <Clock key="clock" className="text-brand-blue" size={24} />,
+    <BookOpen key="book" className="text-brand-blue" size={24} />,
+    <Target key="target" className="text-brand-blue" size={24} />,
+    <Star key="star" className="text-brand-blue" size={24} />
   ];
 
-  const handleRecord = () => {
-    setIsRecording(!isRecording);
-    // Add actual recording logic here
-  };
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        setIsLoading(true);
+        const storedSetup = localStorage.getItem('assessmentSetup');
+        if (!storedSetup) {
+          navigate('/assessment/setup');
+          return;
+        }
 
-  const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setIsRecording(false);
+        const parsedSetup = JSON.parse(storedSetup);
+        setSetupData(parsedSetup);
+
+        const response = await fetch('http://localhost:8000/generate-questions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(parsedSetup),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch questions');
+        }
+
+        const data = await response.json();
+        
+        // Ensure we have an array of questions
+        const questionsList = Array.isArray(data.questions) ? data.questions : 
+                            Array.isArray(data) ? data : [];
+        
+        if (questionsList.length === 0) {
+          throw new Error('No questions received from the server');
+        }
+
+        setQuestions(questionsList);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load questions. Please try again.');
+        console.error('Error fetching questions:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchQuestions();
+
+    return () => {
+      stopRecording();
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [navigate]);
+
+  const sendMediaToServer = async (mediaBlob) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (!mediaBlob || mediaBlob.size === 0) {
+        throw new Error("No recording data available");
+      }
+
+      const formData = new FormData();
+      formData.append(
+        "file",
+        mediaBlob,
+        `question_${currentQuestionIndex}.webm`
+      );
+      formData.append("questionIndex", currentQuestionIndex);
+
+      const response = await fetch("http://localhost:8000/process-audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${errorText || response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.status === "success" && data.text) {
+        setTranscribedText(data.text);
+        
+        // Get feedback analysis
+        const feedbackResponse = await fetch("http://localhost:8000/analyze-text", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: data.text }),
+        });
+
+        if (!feedbackResponse.ok) {
+          throw new Error("Failed to get feedback analysis");
+        }
+
+        const feedbackResult = await feedbackResponse.json();
+        
+        // Store feedback for current question
+        setFeedbackData(prev => {
+          const newFeedback = [...prev];
+          newFeedback[currentQuestionIndex] = {
+            text: data.text,
+            grammar: feedbackResult.grammar,
+            pronunciation: feedbackResult.pronunciation
+          };
+          return newFeedback;
+        });
+      } else {
+        setError(data.message || "Failed to transcribe audio");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Upload error:", error);
+      setError(
+        error.message || "Failed to upload recording. Please try again."
+      );
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
-  return (
-    <ConversationLayout>
-      {/* Header with gradient background */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-brand-blue via-brand-purple to-brand-orange opacity-10 rounded-t-2xl" />
 
-      {/* Progress Bar */}
-      <div className="mb-8 relative">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
-          <span className="font-medium bg-brand-yellow/10 text-brand-orange px-3 py-1 rounded-full">
-            Question {currentQuestionIndex + 1}/{questions.length}
-          </span>
-          <span className="bg-brand-purple/10 text-brand-purple px-3 py-1 rounded-full">
-            Grammar Assessment
-          </span>
-        </div>
-        <div className="w-full bg-gray-100 rounded-full h-3 shadow-inner">
-          <div
-            className="bg-gradient-to-r from-brand-blue via-brand-purple to-brand-orange rounded-full h-3 transition-all duration-300"
-            style={{
-              width: `${
-                ((currentQuestionIndex + 1) / questions.length) * 100
-              }%`,
-            }}
-          />
+  const startRecording = async () => {
+    setError(null);
+    setTranscribedText("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType: "video/webm;codecs=vp9,opus",
+      });
+
+      setMediaStream(stream);
+      videoRef.current.srcObject = stream;
+      chunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const mediaBlob = new Blob(chunksRef.current, { type: "video/webm" });
+
+        try {
+          await sendMediaToServer(mediaBlob);
+          setAssessmentStage("review");
+        } catch (error) {
+          console.error("Failed to process recording:", error);
+          setAssessmentStage("preview");
+        }
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      setAssessmentStage("recording");
+      setRecordingDuration(0);
+
+      timerRef.current = setInterval(() => {
+        setRecordingDuration((prev) => {
+          if (prev >= MAX_RECORDING_TIME) {
+            stopRecording();
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } catch (err) {
+      setError(
+        "Error accessing media devices. Please check your camera and microphone permissions."
+      );
+      console.error("Error accessing media devices:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+      }
+
+      setIsRecording(false);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    }
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setAssessmentStage("preview");
+      setError(null);
+      setRecordingDuration(0);
+      setTranscribedText("");
+    }
+  };
+
+  const resetAssessment = () => {
+    setCurrentQuestionIndex(0);
+    setAssessmentStage("preview");
+    setError(null);
+    setRecordingDuration(0);
+    setTranscribedText("");
+    setFeedbackData([]);
+    stopRecording();
+  };
+
+  const viewFeedback = () => {
+    // Store feedback data in localStorage to access it in the feedback page
+    localStorage.setItem('assessmentFeedback', JSON.stringify({
+      questions,
+      feedback: feedbackData,
+      setup: setupData
+    }));
+    navigate('/assessment/feedback');
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const isAssessmentComplete = currentQuestionIndex === questions.length - 1 && transcribedText;
+
+  if (isLoading && questions.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader className="w-8 h-8 animate-spin text-brand-blue mx-auto mb-4" />
+          <p className="text-gray-600">Loading your assessment questions...</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Question Display with enhanced styling */}
-      <div className="text-center mb-12 p-6 bg-gradient-to-b from-white to-gray-50 rounded-xl shadow-sm">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-          {questions[currentQuestionIndex]}
-        </h2>
-        <p className="text-gray-600 flex items-center justify-center gap-2">
-          <Volume2 className="text-brand-purple" size={18} />
-          Press the microphone button and speak your answer
-        </p>
-      </div>
-
-      {/* Recording Interface with Waveform */}
-      <div className="flex flex-col items-center space-y-6">
-        <div className="relative">
+  if (error && questions.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
+          <XCircle className="w-12 h-12 text-brand-red mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Failed to Load Questions</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={handleRecord}
-            className={`p-6 rounded-full transition-all duration-300 shadow-lg ${
-              isRecording
-                ? "bg-brand-red text-white animate-pulse ring-4 ring-red-200"
-                : "bg-gradient-to-r from-brand-blue to-brand-purple text-white hover:from-brand-purple hover:to-brand-orange"
-            }`}
+            onClick={() => navigate('/assessment/setup')}
+            className="px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/90 transition-colors"
           >
-            {isRecording ? (
-              <MicOff className="w-8 h-8" />
-            ) : (
-              <Mic className="w-8 h-8" />
-            )}
+            Return to Setup
           </button>
-          {isRecording && (
-            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-              <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-brand-red opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-red"></span>
-            </div>
-          )}
         </div>
-
-        {/* Waveform Visualizer */}
-        <div className="w-full max-w-md p-4 bg-gray-50 rounded-xl shadow-inner">
-          <WaveformVisualizer isRecording={isRecording} />
-        </div>
-
-        <span className="text-sm font-medium px-3 py-1 rounded-full bg-gray-100">
-          {isRecording ? "Recording..." : "Click to start recording"}
-        </span>
       </div>
+    );
+  }
 
-      {/* Navigation with gradient button */}
-      <div className="mt-12 flex justify-end">
-        <button
-          onClick={handleNext}
-          disabled={currentQuestionIndex === questions.length - 1}
-          className={`flex items-center space-x-2 px-6 py-3 rounded-lg shadow-md ${
-            currentQuestionIndex === questions.length - 1
-              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-brand-blue to-brand-purple hover:from-brand-purple hover:to-brand-orange text-white transform hover:scale-105"
-          } transition-all duration-300`}
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
+          <XCircle className="w-12 h-12 text-brand-red mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">No Questions Available</h2>
+          <p className="text-gray-600 mb-4">Please return to setup and try again.</p>
+          <button
+            onClick={() => navigate('/assessment/setup')}
+            className="px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/90 transition-colors"
+          >
+            Return to Setup
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="h-full bg-gradient-to-br from-gray-50 to-gray-100 p-6"
+    >
+      <div className="h-full flex gap-6">
+        {/* Left Section */}
+        <motion.div
+          initial={{ x: -50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+          className="w-[50%] flex flex-col"
         >
-          <span>Next Question</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-4">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className="text-lg font-bold text-brand-purple flex items-center gap-2"
+              >
+                <CheckCircle className="text-brand-blue" size={20} />
+                Grammar Assessment
+              </motion.span>
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="px-3 py-1 bg-brand-purple/10 rounded-full text-xs font-medium text-brand-purple"
+              >
+                {currentQuestionIndex + 1}/{questions.length}
+              </motion.span>
+            </div>
+            <button
+              onClick={() => navigate('/assessment/setup')}
+              className="text-gray-600 hover:text-brand-blue transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={16} />
+              <span className="text-sm">Back to Setup</span>
+            </button>
+          </div>
+
+          {/* Question Card */}
+          <motion.div
+            key={currentQuestionIndex}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-brand-blue/10 relative overflow-hidden"
+          >
+            <div className="absolute top-4 right-4">
+              {questionIcons[currentQuestionIndex % questionIcons.length]}
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3 pr-10">
+              {questions[currentQuestionIndex]}
+            </h2>
+            <p className="text-gray-600 flex items-center gap-2">
+              <Volume2 className="text-brand-orange" size={18} />
+              Speak clearly into your microphone
+            </p>
+          </motion.div>
+
+          {/* Recording Interface */}
+          <div className="relative">
+            <AnimatePresence>
+              {!isRecording ? (
+                <motion.button
+                  key="start-recording"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={startRecording}
+                  className="w-full h-16 flex items-center justify-center gap-3 bg-gradient-to-r from-brand-blue to-brand-purple text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all"
+                >
+                  <Video size={20} />
+                  Start Recording
+                </motion.button>
+              ) : (
+                <motion.div
+                  key="recording-wave"
+                  initial={{ height: 64, opacity: 0.8 }}
+                  animate={{ height: 128, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-2xl shadow-sm overflow-hidden relative"
+                >
+                  <WaveformVisualizer
+                    isRecording={isRecording}
+                    stream={mediaStream}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {isRecording && (
+              <div className="absolute top-4 left-4 text-sm font-medium text-brand-purple">
+                {formatTime(recordingDuration)} /{" "}
+                {formatTime(MAX_RECORDING_TIME)}
+              </div>
+            )}
+
+            {isRecording && (
+              <motion.button
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={stopRecording}
+                className="absolute -top-3 -right-3 bg-brand-red text-white px-4 py-3 rounded-full shadow-lg hover:bg-brand-red/90 transition-colors flex items-center gap-2 font-medium border-2 border-white"
+              >
+                <VideoOff size={20} />
+                <span>Stop Recording</span>
+              </motion.button>
+            )}
+          </div>
+
+          {/* Transcribed Text Display */}
+          {transcribedText && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-6 p-4 bg-white rounded-xl shadow-md border border-brand-blue/10"
+            >
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Transcribed Speech:</h3>
+              <p className="text-gray-800">{transcribedText}</p>
+            </motion.div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-4 bg-red-50 text-red-600 rounded-lg"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          {/* Navigation */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-auto flex gap-4"
+          >
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={resetAssessment}
+              className="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 rounded-xl flex items-center justify-center font-medium shadow-md hover:shadow-lg transition-all"
+            >
+              Restart
+              <XCircle className="ml-2" size={18} />
+            </motion.button>
+
+            {isAssessmentComplete ? (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={viewFeedback}
+                className="flex-1 bg-gradient-to-r from-brand-purple to-brand-blue text-white py-3 rounded-xl flex items-center justify-center font-medium shadow-md hover:shadow-lg transition-all"
+              >
+                View Feedback
+                <FileText className="ml-2" size={18} />
+              </motion.button>
+            ) : (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={nextQuestion}
+                disabled={!transcribedText}
+                className="flex-1 bg-gradient-to-r from-brand-yellow to-brand-orange text-white py-3 rounded-xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg transition-all"
+              >
+                Next Question
+                <ChevronRight className="ml-2" size={18} />
+              </motion.button>
+            )}
+          </motion.div>
+        </motion.div>
+
+        {/* Right Section - Video Preview */}
+        <VideoPreview videoRef={videoRef} isRecording={isRecording} />
       </div>
-    </ConversationLayout>
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg flex items-center gap-3">
+            <Loader className="animate-spin" />
+            <span>Processing recording...</span>
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 }
 

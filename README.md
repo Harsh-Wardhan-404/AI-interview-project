@@ -11,7 +11,7 @@ npm run dev
 
 these commands for fastAPi configuration
 
-cd fastApi
+cd fastapi
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
