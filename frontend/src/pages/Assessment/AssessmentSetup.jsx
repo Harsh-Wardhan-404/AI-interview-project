@@ -16,7 +16,7 @@ function AssessmentSetup() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     questionType: 'general',
-    numberOfQuestions: 5,
+    numberOfQuestions: 4,
     topic: 'daily_life',
     difficulty: 'intermediate',
     customQuestionType: '',
@@ -79,7 +79,7 @@ function AssessmentSetup() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-8 border border-gray-100">
           <div className="mb-12 text-center">
             <div className="flex items-center justify-center mb-4">
@@ -107,18 +107,16 @@ function AssessmentSetup() {
                     key={type.id}
                     type="button"
                     onClick={() => handleInputChange('questionType', type.id)}
-                    className={`p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg ${
-                      formData.questionType === type.id
+                    className={`p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg ${formData.questionType === type.id
                         ? 'border-brand-blue bg-brand-blue/5 shadow-lg'
                         : 'border-gray-100 hover:border-brand-blue/50 shadow'
-                    }`}
+                      }`}
                   >
                     <type.icon
-                      className={`w-8 h-8 mb-3 ${
-                        formData.questionType === type.id
+                      className={`w-8 h-8 mb-3 ${formData.questionType === type.id
                           ? 'text-brand-blue'
                           : 'text-gray-400'
-                      }`}
+                        }`}
                     />
                     <span className="block text-base font-semibold mb-2">
                       {type.label}
@@ -150,8 +148,8 @@ function AssessmentSetup() {
               <div className="bg-gray-50 p-6 rounded-2xl">
                 <input
                   type="range"
-                  min="3"
-                  max="10"
+                  min="1"
+                  max="7" 
                   value={formData.numberOfQuestions}
                   onChange={(e) =>
                     handleInputChange('numberOfQuestions', parseInt(e.target.value))
@@ -178,15 +176,13 @@ function AssessmentSetup() {
                     key={topic.id}
                     type="button"
                     onClick={() => handleInputChange('topic', topic.id)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
-                      formData.topic === topic.id
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${formData.topic === topic.id
                         ? 'border-brand-purple bg-brand-purple/5 text-brand-purple shadow-lg'
                         : 'border-gray-100 text-gray-600 hover:border-brand-purple/50 shadow hover:shadow-lg'
-                    }`}
+                      }`}
                   >
-                    <topic.icon className={`w-6 h-6 mb-2 mx-auto ${
-                      formData.topic === topic.id ? 'text-brand-purple' : 'text-gray-400'
-                    }`} />
+                    <topic.icon className={`w-6 h-6 mb-2 mx-auto ${formData.topic === topic.id ? 'text-brand-purple' : 'text-gray-400'
+                      }`} />
                     <span className="block text-center">{topic.label}</span>
                   </button>
                 ))}
@@ -215,15 +211,13 @@ function AssessmentSetup() {
                     key={level.id}
                     type="button"
                     onClick={() => handleInputChange('difficulty', level.id)}
-                    className={`group p-6 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
-                      formData.difficulty === level.id
+                    className={`group p-6 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${formData.difficulty === level.id
                         ? `${level.color} border-transparent text-white shadow-lg`
                         : 'border-gray-100 text-gray-600 hover:shadow-lg'
-                    }`}
+                      }`}
                   >
-                    <level.icon className={`w-6 h-6 mb-2 mx-auto ${
-                      formData.difficulty === level.id ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
-                    }`} />
+                    <level.icon className={`w-6 h-6 mb-2 mx-auto ${formData.difficulty === level.id ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
+                      }`} />
                     <span className="block text-center font-medium">
                       {level.label}
                     </span>

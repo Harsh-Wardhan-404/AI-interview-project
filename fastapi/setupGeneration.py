@@ -4,6 +4,10 @@ import logging
 from typing import Dict, List
 from groq import Groq
 from pydantic import BaseModel
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -75,7 +79,7 @@ def extract_questions_from_text(text: str, num_questions: int) -> List[str]:
 
 def generate_questions(setup: AssessmentSetup) -> List[str]:
     client = Groq(
-        api_key="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",
+        api_key=os.getenv("Grok_API_KEY"),
     )
 
     prompt = generate_prompt(setup)
