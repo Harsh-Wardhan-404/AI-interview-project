@@ -4,7 +4,6 @@ import { Loader, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import VideoPreview from "../../components/Assessment/VideoPreview";
 import AssessmentContent from "../../components/Assessment/AssessmentContent";
-import ConversationLayout from "../../layouts/conversationLayout";
 import { fetchQuestions } from "../../services/questionService";
 import { sendMediaToServer } from "../../services/mediaService";
 
@@ -251,7 +250,7 @@ function GrammarAssessment() {
   }
 
   return (
-    <ConversationLayout>
+    <div className="px-7 h-auto">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -287,7 +286,7 @@ function GrammarAssessment() {
           </div>
         </div>
       )}
-    </ConversationLayout>
+    </div>
   );
 }
 
