@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from groq import Groq
 from typing import Dict, List, Optional
 from dotenv import load_dotenv
@@ -67,6 +68,61 @@ class FeedbackProcessor:
         
         Return ONLY the JSON object, no additional text."""
 
+    def analyze_fluency(self, text: str) -> Dict:
+        """
+        Analyze text for fluency by detecting filler words and hesitations.
+        Returns a dictionary containing fluency metrics.
+        """
+        # List of common filler words and hesitation sounds
+        filler_patterns = [
+            r'\b(hmm+|um+|uh+|aaa+|aa+|mmm+|mm+|ah+|er+|erm+|uhm+|uhmm+|uhhuh|uhuh)\b',
+            r'\b(like|you know|basically|actually|literally|sort of|kind of)\b'
+        ]
+
+        # Combine patterns into one regex
+        combined_pattern = '|'.join(filler_patterns)
+        
+        # Find all matches
+        matches = re.finditer(combined_pattern, text.lower())
+        
+        # Store all filler words with their positions
+        filler_words = []
+        total_count = 0
+        
+        for match in matches:
+            filler_words.append({
+                "word": match.group(),
+                "position": match.start(),
+                "context": text[max(0, match.start()-20):min(len(text), match.end()+20)]
+            })
+            total_count += 1
+
+        # Calculate fluency score (100 - deductions)
+        # Deduct points based on the frequency of filler words
+        words_in_text = len(text.split())
+        filler_ratio = total_count / max(1, words_in_text)
+        fluency_score = max(0, min(100, 100 - (filler_ratio * 200)))  # Deduct more points for higher filler word density
+
+        return {
+            "fluency_score": round(fluency_score, 1),
+            "filler_word_count": total_count,
+            "filler_words": filler_words,
+            "words_analyzed": words_in_text,
+            "filler_ratio": round(filler_ratio * 100, 1),
+            "feedback": self._generate_fluency_feedback(total_count, words_in_text, fluency_score)
+        }
+
+    def _generate_fluency_feedback(self, filler_count: int, total_words: int, fluency_score: float) -> str:
+        """Generate feedback message based on fluency analysis."""
+        if fluency_score >= 90:
+            return "Excellent fluency! Your speech flows naturally with minimal use of filler words."
+        elif fluency_score >= 75:
+            return "Good fluency overall. Consider reducing the use of filler words slightly to improve clarity."
+        elif fluency_score >= 60:
+            return "Moderate fluency. Try to be more conscious of filler words and practice speaking with more confidence."
+        else:
+            return "Your speech contains frequent filler words which may affect clarity. Focus on reducing hesitations and practice speaking with more confidence."
+
     async def analyze_grammar(self, text: str) -> Dict:
         """
         Analyze text for grammar mistakes using Groq LLM.
@@ -83,7 +139,7 @@ class FeedbackProcessor:
                         "content": f"Analyze this text: {text}",
                     }
                 ],
-                model="llama3-8b-8192",
+                model="llama-3.2-3b-preview",
             )
             
             analysis = response.choices[0].message.content
@@ -111,7 +167,7 @@ class FeedbackProcessor:
                         "content": f"Analyze this text: {text}",
                     }
                 ],
-                model="llama3-8b-8192",
+                model="llama-3.2-3b-preview",
             )
             
             analysis = response.choices[0].message.content
@@ -161,11 +217,12 @@ class FeedbackProcessor:
 
     async def analyze_text(self, text: str, question: Optional[str] = None) -> Dict:
         """
-        Analyze text for grammar, pronunciation, vocabulary, and answer correctness.
+        Analyze text for grammar, pronunciation, vocabulary, fluency and answer correctness.
         """
         grammar_analysis = await self.analyze_grammar(text)
         pronunciation_analysis = await self.analyze_pronunciation(text)
         vocabulary_analysis = analyze_vocabulary(text)
+        fluency_analysis = self.analyze_fluency(text)
         
         # Add answer correctness analysis if question is provided
         correctness_analysis = None
@@ -176,6 +233,7 @@ class FeedbackProcessor:
             "grammar": grammar_analysis,
             "pronunciation": pronunciation_analysis,
             "vocabulary": vocabulary_analysis,
+            "fluency": fluency_analysis,
             "text": text
         }
 

@@ -107,7 +107,7 @@ def generate_questions(setup: AssessmentSetup) -> List[str]:
         )
         
         response_content = chat_completion.choices[0].message.content
-        logger.info(f"Raw response: {response_content}")
+        # logger.info(f"Raw response: {response_content}")
         
         # Extract questions from the response
         questions = extract_questions_from_text(response_content, setup.numberOfQuestions)
@@ -148,6 +148,6 @@ async def generate_assessment_questions(setup: Dict) -> List[str]:
     questions = generate_questions(assessment_setup)
     
     # Log the final questions for debugging
-    logger.info(f"Final questions: {questions}")
+    # logger.info(f"Final questions: {questions}")
     
     return questions
