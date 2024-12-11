@@ -18,7 +18,8 @@ function Navbar(props) {
   };
 
   const handleGithubClick = () => {
-    window.location.href = "https://github.com"; // Replace with the desired URL
+    window.location.href =
+      "https://github.com/AryaK19/AI-driven-English-communication-assessment-system/tree/main";
   };
 
   return (
