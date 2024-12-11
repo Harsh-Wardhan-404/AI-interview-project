@@ -43,8 +43,7 @@ async def process_audio(file: UploadFile = File(...)):
     try:
         # Create a temporary directory if it doesn't exist
 
-        print("NIGGA")
-        logger.info("sdhfisdfsdfsdfsdfs")
+
         temp_dir = "temp_audio"
         os.makedirs(temp_dir, exist_ok=True)
         # Save the uploaded file temporarily
@@ -83,7 +82,7 @@ async def analyze_text(text_data: Dict = Body(...)):
         feedback = await feedback_processor.analyze_text(text,tempFileName=temp_file_manager.temp_file_path)
 
         
-        logger.info(f"Feedback: {feedback}")
+
         os.remove(temp_file_manager.temp_file_path)
         
         temp_file_manager.temp_file_path = ""
