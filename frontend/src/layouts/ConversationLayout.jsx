@@ -1,5 +1,5 @@
 // components/layouts/ConversationLayout.jsx
-import React from 'react'
+import React from "react";
 
 function ConversationLayout({ children }) {
   return (
@@ -11,6 +11,7 @@ function ConversationLayout({ children }) {
       </div>
 
   )
+
 }
 
-export default ConversationLayout
+export default ConversationLayout;
