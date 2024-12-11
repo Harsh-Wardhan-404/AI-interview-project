@@ -11,8 +11,8 @@ from .vocab_check import analyze_vocabulary
 class FeedbackProcessor:
     def __init__(self):
         self.client = Groq(
-            # api_key="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",
-            api_key=os.getenv("Grok_API_KEY"),
+            api_key="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",
+            # api_key=os.getenv("Grok_API_KEY"),
         )
 
         self.grammar_prompt = """You are a grammar expert. Analyze the given text for grammatical errors, focusing ONLY on:
