@@ -36,7 +36,7 @@ async def process_audio_file(file_path: str, language: str = "en") -> dict:
         with open(file_path, "rb") as file:
             transcription = client.audio.transcriptions.create(
                 file=(os.path.basename(file_path), file.read()),
-                model="whisper-large-v3",
+                model="whisper-large-v3-turbo",
                 response_format="json",
                 language=language,
                 temperature=0.0

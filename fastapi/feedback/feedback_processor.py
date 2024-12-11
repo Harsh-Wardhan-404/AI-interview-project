@@ -3,10 +3,11 @@ import json
 from groq import Groq
 from typing import Dict, List, Optional
 from dotenv import load_dotenv
-
-# # Load environment variables
-load_dotenv()
+from .check_correctness import check_answer_correctness
 from .vocab_check import analyze_vocabulary
+
+# Load environment variables
+load_dotenv()
 
 class FeedbackProcessor:
     def __init__(self):
@@ -158,17 +159,27 @@ class FeedbackProcessor:
                 "errors": []
             }
 
-    async def analyze_text(self, text: str) -> Dict:
+    async def analyze_text(self, text: str, question: Optional[str] = None) -> Dict:
         """
-        Analyze text for grammar, pronunciation, and vocabulary.
+        Analyze text for grammar, pronunciation, vocabulary, and answer correctness.
         """
         grammar_analysis = await self.analyze_grammar(text)
         pronunciation_analysis = await self.analyze_pronunciation(text)
         vocabulary_analysis = analyze_vocabulary(text)
+        
+        # Add answer correctness analysis if question is provided
+        correctness_analysis = None
+        if question:
+            correctness_analysis = check_answer_correctness(question, text)
 
-        return {
+        feedback = {
             "grammar": grammar_analysis,
             "pronunciation": pronunciation_analysis,
             "vocabulary": vocabulary_analysis,
             "text": text
         }
+
+        if correctness_analysis:
+            feedback["correctness"] = correctness_analysis
+
+        return feedback
