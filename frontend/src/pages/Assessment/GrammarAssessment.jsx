@@ -4,7 +4,6 @@ import { Loader, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import VideoPreview from "../../components/Assessment/VideoPreview";
 import AssessmentContent from "../../components/Assessment/AssessmentContent";
-import ConversationLayout from "../../layouts/conversationLayout";
 import { fetchQuestions } from "../../services/questionService";
 import { sendMediaToServer } from "../../services/mediaService";
 
@@ -20,6 +19,7 @@ function GrammarAssessment() {
   const [feedbackData, setFeedbackData] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [setupData, setSetupData] = useState(null);
+  const [videoUrls, setVideoUrls] = useState([]);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -69,10 +69,19 @@ function GrammarAssessment() {
       const result = await sendMediaToServer(mediaBlob, currentQuestionIndex);
       setTranscribedText(result.transcribedText);
       
+      // Create a URL for the video blob
+      const videoUrl = URL.createObjectURL(mediaBlob);
+      setVideoUrls(prev => {
+        const newUrls = [...prev];
+        newUrls[currentQuestionIndex] = videoUrl;
+        return newUrls;
+      });
+
       setFeedbackData(prev => {
         const newFeedback = [...prev];
         newFeedback[currentQuestionIndex] = {
           text: result.transcribedText,
+          videoUrl: videoUrl,
           ...result.feedback
         };
         return newFeedback;
@@ -97,9 +106,19 @@ function GrammarAssessment() {
         video: true,
       });
 
-      mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: "video/webm;codecs=vp9,opus",
-      });
+      // Try MP4 with H.264 codec first
+      const mimeType = 'video/mp4; codecs="avc1.42E01E,mp4a.40.2"';
+      const options = { mimeType };
+
+      try {
+        mediaRecorderRef.current = new MediaRecorder(stream, options);
+      } catch (e) {
+        // Fallback to WebM if MP4 is not supported
+        console.warn("MP4 recording not supported, falling back to WebM");
+        mediaRecorderRef.current = new MediaRecorder(stream, {
+          mimeType: "video/webm;codecs=vp9,opus"
+        });
+      }
 
       setMediaStream(stream);
       videoRef.current.srcObject = stream;
@@ -113,7 +132,9 @@ function GrammarAssessment() {
 
       mediaRecorderRef.current.onstop = async () => {
         stream.getTracks().forEach((track) => track.stop());
-        const mediaBlob = new Blob(chunksRef.current, { type: "video/webm" });
+        const mediaBlob = new Blob(chunksRef.current, { 
+          type: mediaRecorderRef.current.mimeType 
+        });
 
         try {
           await handleMediaUpload(mediaBlob);
@@ -183,6 +204,7 @@ function GrammarAssessment() {
     setRecordingDuration(0);
     setTranscribedText("");
     setFeedbackData([]);
+    setVideoUrls([]);
     stopRecording();
   };
 
@@ -190,7 +212,8 @@ function GrammarAssessment() {
     localStorage.setItem('assessmentFeedback', JSON.stringify({
       questions,
       feedback: feedbackData,
-      setup: setupData
+      setup: setupData,
+      videoUrls: videoUrls
     }));
     navigate('/dashboard/assessment/feedback');
   };
@@ -251,7 +274,7 @@ function GrammarAssessment() {
   }
 
   return (
-    <ConversationLayout>
+    <div className="px-7 h-auto">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -287,7 +310,7 @@ function GrammarAssessment() {
           </div>
         </div>
       )}
-    </ConversationLayout>
+    </div>
   );
 }
 
