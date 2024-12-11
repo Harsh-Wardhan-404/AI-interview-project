@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getIdealAnswer } from '../../services/api';
 
 const FeedbackPage = () => {
   const navigate = useNavigate();
   const [assessmentData, setAssessmentData] = useState(null);
   const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
+  const [idealAnswers, setIdealAnswers] = useState({});
+  const [loadingIdealAnswer, setLoadingIdealAnswer] = useState({});
 
   useEffect(() => {
     const storedData = localStorage.getItem('assessmentFeedback');
@@ -12,6 +15,45 @@ const FeedbackPage = () => {
       setAssessmentData(JSON.parse(storedData));
     }
   }, []);
+
+  const handleGetIdealAnswer = async (question, answer, index) => {
+    try {
+      setLoadingIdealAnswer(prev => ({ ...prev, [index]: true }));
+      const result = await getIdealAnswer(question, answer);
+      
+      // Parse the response data if it's a string
+      let parsedData;
+      try {
+        parsedData = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+      } catch (e) {
+        console.error('Error parsing ideal answer response:', e);
+        parsedData = {
+          ideal_answer: 'Error parsing response',
+          user_strengths: 'Unable to analyze',
+          areas_for_improvement: 'Unable to analyze',
+          improvement_suggestions: 'Unable to analyze'
+        };
+      }
+
+      setIdealAnswers(prev => ({
+        ...prev,
+        [index]: parsedData
+      }));
+    } catch (error) {
+      console.error('Error getting ideal answer:', error);
+      setIdealAnswers(prev => ({
+        ...prev,
+        [index]: {
+          ideal_answer: 'Failed to get ideal answer',
+          user_strengths: 'Error occurred',
+          areas_for_improvement: 'Error occurred',
+          improvement_suggestions: 'Please try again later'
+        }
+      }));
+    } finally {
+      setLoadingIdealAnswer(prev => ({ ...prev, [index]: false }));
+    }
+  };
 
   if (!assessmentData) {
     return (
@@ -41,6 +83,10 @@ const FeedbackPage = () => {
         acc.totalAdvancedWords += questionFeedback.vocabulary.total_advanced_words;
         acc.vocabularyCount += 1;
       }
+      if (questionFeedback.correctness) {
+        acc.totalCorrectnessScore += questionFeedback.correctness.score;
+        acc.correctnessCount += 1;
+      }
     }
     return acc;
   }, { 
@@ -50,7 +96,9 @@ const FeedbackPage = () => {
     fluencyCount: 0,
     totalVocabularyScore: 0,
     totalAdvancedWords: 0,
-    vocabularyCount: 0
+    vocabularyCount: 0,
+    totalCorrectnessScore: 0,
+    correctnessCount: 0
   });
 
   const totalQuestions = assessmentData.questions.length;
@@ -64,13 +112,17 @@ const FeedbackPage = () => {
   const vocabularyPerformance = overallStats.vocabularyCount > 0
     ? overallStats.totalVocabularyScore / overallStats.vocabularyCount
     : 50;
+  const correctnessPerformance = overallStats.correctnessCount > 0
+    ? overallStats.totalCorrectnessScore / overallStats.correctnessCount
+    : 0;
 
   // Calculate overall score (weighted average)
   const overallScore = Math.round(
-    (grammarPerformance * 0.25) +
-    (pronunciationPerformance * 0.25) +
-    (fluencyPerformance * 0.25) +
-    (vocabularyPerformance * 0.25)
+    (grammarPerformance * 0.2) +
+    (pronunciationPerformance * 0.2) +
+    (fluencyPerformance * 0.2) +
+    (vocabularyPerformance * 0.2) +
+    (correctnessPerformance * 0.2)
   );
 
   const getHealthBarColor = (percentage) => {
@@ -134,7 +186,7 @@ const FeedbackPage = () => {
             </div>
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">
-                Based on Grammar, Pronunciation, Fluency, and Vocabulary
+                Based on Grammar, Pronunciation, Fluency, Vocabulary, and Answer Correctness
               </p>
             </div>
           </div>
@@ -216,6 +268,25 @@ const FeedbackPage = () => {
                 {overallStats.totalAdvancedWords} advanced words used
               </p>
             </div>
+
+            {/* Answer Correctness Performance */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="flex justify-between items-center mb-1.5">
+                <h3 className="text-sm font-medium text-gray-800">Answer Correctness</h3>
+                <span className="text-xs font-medium text-brand-blue">
+                  {correctnessPerformance.toFixed(1)}%
+                </span>
+              </div>
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full ${getHealthBarColor(correctnessPerformance)} transition-all duration-500`}
+                  style={{ width: `${correctnessPerformance}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Based on relevance and word count
+              </p>
+            </div>
           </div>
         </div>
 
@@ -227,7 +298,7 @@ const FeedbackPage = () => {
         </button>
       </div>
 
-      {/* Rest of the component remains the same */}
+      {/* Detailed Feedback Section */}
       {showDetailedFeedback && (
         <div className="space-y-6">
           {assessmentData.questions.map((question, index) => (
@@ -241,6 +312,59 @@ const FeedbackPage = () => {
                     <div className="text-gray-600">
                       Your answer: {assessmentData.feedback[index].text}
                     </div>
+
+                    {/* Ideal Answer Button */}
+                    <div className="mt-4">
+                      <button
+                        onClick={() => handleGetIdealAnswer(question, assessmentData.feedback[index].text, index)}
+                        disabled={loadingIdealAnswer[index]}
+                        className="px-4 py-2 bg-brand-purple text-white rounded-lg hover:opacity-90 transition-colors text-sm disabled:opacity-50"
+                      >
+                        {loadingIdealAnswer[index] ? 'Loading...' : 'Show Ideal Answer'}
+                      </button>
+                    </div>
+
+                    {/* Ideal Answer Display */}
+                    {idealAnswers[index] && (
+                      <div className="bg-purple-50 p-4 rounded-lg mt-4">
+                        <h3 className="font-semibold text-brand-purple mb-3">Ideal Answer Analysis</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700">Ideal Answer:</h4>
+                            <p className="text-sm text-gray-600 mt-1">{String(idealAnswers[index].ideal_answer)}</p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700">Your Strengths:</h4>
+                            <p className="text-sm text-gray-600 mt-1">{String(idealAnswers[index].user_strengths)}</p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700">Areas for Improvement:</h4>
+                            <p className="text-sm text-gray-600 mt-1">{String(idealAnswers[index].areas_for_improvement)}</p>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700">Improvement Suggestions:</h4>
+                            <p className="text-sm text-gray-600 mt-1">{String(idealAnswers[index].improvement_suggestions)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Answer Correctness Feedback */}
+                    {assessmentData.feedback[index].correctness && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-sm">Answer Assessment</h3>
+                          <span className="bg-blue-100 text-brand-blue px-2 py-0.5 rounded-full text-xs">
+                            {assessmentData.feedback[index].correctness.score}% score
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <div className="text-sm text-gray-700 whitespace-pre-line">
+                            {assessmentData.feedback[index].correctness.detailed_feedback}
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Grammar Feedback */}
                     <div className="bg-gray-50 p-4 rounded-lg">
