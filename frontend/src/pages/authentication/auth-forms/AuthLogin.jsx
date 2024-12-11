@@ -50,7 +50,7 @@ export default function AuthLogin({ isDemo = false }) {
       await loginUser(email, password);
       console.log("Login successful");
       // Redirect to dashboard or any protected page after login
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       // Handle errors returned from the API
       setErrors({ submit: error.response?.data?.message || "Login failed" });

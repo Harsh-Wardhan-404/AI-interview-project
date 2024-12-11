@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Profile from "./Profile";
+import { GithubOutlined } from "@ant-design/icons";
 
 function Navbar(props) {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +15,10 @@ function Navbar(props) {
 
   const handleSignUp = () => {
     navigate("/register");
+  };
+
+  const handleGithubClick = () => {
+    window.location.href = "https://github.com"; // Replace with the desired URL
   };
 
   return (
@@ -42,6 +48,20 @@ function Navbar(props) {
                 <User className="w-4 h-4" />
                 <span>Sign Up</span>
               </button>
+            </div>
+          )}
+
+          {props.isUserAuthenticated && (
+            <div className="hidden md:flex items-center space-x-4">
+              <GithubOutlined
+                onClick={handleGithubClick}
+                style={{
+                  fontSize: "34px",
+                  cursor: "pointer",
+                  marginRight: "16px",
+                }}
+              />
+              <Profile />
             </div>
           )}
 
@@ -78,6 +98,19 @@ function Navbar(props) {
                   >
                     Sign Up
                   </button>
+                </div>
+              )}
+              {props.isUserAuthenticated && (
+                <div className="mt-4 space-y-2">
+                  <GithubOutlined
+                    onClick={handleGithubClick}
+                    style={{
+                      fontSize: "34px",
+                      cursor: "pointer",
+                      marginRight: "16px",
+                    }}
+                  />
+                  <Profile />
                 </div>
               )}
             </div>

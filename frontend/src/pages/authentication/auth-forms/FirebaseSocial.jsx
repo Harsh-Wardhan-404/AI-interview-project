@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../../../firebase/firebase";
+import { useNavigate } from "react-router-dom";
 
 // assets
 import Google from "../../../assets/icons/google.svg";
@@ -13,10 +14,12 @@ import { fromPairs } from "lodash";
 // ==============================|| FIREBASE - SOCIAL BUTTON ||============================== //
 
 export default function FirebaseSocial() {
+  const navigate = useNavigate();
   const googleHandler = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       // Handle the result here (e.g., save user info, redirect, etc.)
+      navigate("/dashboard");
       console.log(result.user);
     } catch (error) {
       console.error("Error during Google sign-in:", error);
