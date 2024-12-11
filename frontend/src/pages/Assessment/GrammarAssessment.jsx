@@ -35,7 +35,7 @@ function GrammarAssessment() {
         setIsLoading(true);
         const storedSetup = localStorage.getItem('assessmentSetup');
         if (!storedSetup) {
-          navigate('/assessment/setup');
+          navigate('/dashboard/assessment/setup');
           return;
         }
 
@@ -192,7 +192,7 @@ function GrammarAssessment() {
       feedback: feedbackData,
       setup: setupData
     }));
-    navigate('/assessment/feedback');
+    navigate('/dashboard/assessment/feedback');
   };
 
   const formatTime = (seconds) => {
@@ -222,7 +222,7 @@ function GrammarAssessment() {
           <h2 className="text-xl font-bold text-gray-800 mb-2">Failed to Load Questions</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => navigate('/assessment/setup')}
+            onClick={() => navigate('/dashboard/assessment/setup')}
             className="px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/90 transition-colors"
           >
             Return to Setup
@@ -240,7 +240,7 @@ function GrammarAssessment() {
           <h2 className="text-xl font-bold text-gray-800 mb-2">No Questions Available</h2>
           <p className="text-gray-600 mb-4">Please return to setup and try again.</p>
           <button
-            onClick={() => navigate('/assessment/setup')}
+            onClick={() => navigate('/dashboard/assessment/setup')}
             className="px-4 py-2 bg-brand-blue text-white rounded-lg hover:bg-brand-blue/90 transition-colors"
           >
             Return to Setup

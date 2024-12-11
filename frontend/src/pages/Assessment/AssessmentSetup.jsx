@@ -74,7 +74,7 @@ function AssessmentSetup() {
       topic: formData.topic === 'custom' ? formData.customTopic : formData.topic,
     };
     localStorage.setItem('assessmentSetup', JSON.stringify(finalData));
-    navigate('/assessment/grammar');
+    navigate('/dashboard/assessment/grammar');
   };
 
   return (

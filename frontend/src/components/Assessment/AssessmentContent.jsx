@@ -40,7 +40,7 @@ function AssessmentContent({currentQuestionIndex,questions,isRecording,startReco
           </motion.span>
         </div>
         <button
-          onClick={() => navigate('/assessment/setup')}
+          onClick={() => navigate('/dashboard/assessment/setup')}
           className="text-gray-600 hover:text-brand-blue transition-colors flex items-center gap-2"
         >
           <ArrowLeft size={16} />
