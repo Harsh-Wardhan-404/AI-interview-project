@@ -25,11 +25,6 @@ app.add_middleware(
 # Initialize FeedbackProcessor
 feedback_processor = FeedbackProcessor()
 
-# # Add startup event handler
-# @app.on_event("startup")
-# async def startup_event():
-#     await init_db()
-
 @app.get("/", tags=["root"])
 async def read_root() -> dict:
     return {"message": "Welcome to your new project!"}
@@ -47,14 +42,13 @@ async def process_audio(file: UploadFile = File(...)):
             contents = await file.read()
             buffer.write(contents)
         
-        # Process the audio file
+        # Process the audio file (now includes fluency analysis)
         result = await process_audio_file(temp_file_path)
-        print(result)
         
         # Clean up the temporary file
         os.remove(temp_file_path)
         
-        # Return the processing result
+        # Return the processing result (includes transcription and fluency data)
         return result
         
     except Exception as e:
@@ -79,7 +73,6 @@ async def analyze_text(text_data: Dict = Body(...)):
 @app.post("/generate-questions")
 async def generate_questions(setup_data: Dict = Body(...)) -> Dict[str, List[str]]:
     try:
-            
         questions = await generate_assessment_questions(setup_data)
         return {"questions": questions}
         

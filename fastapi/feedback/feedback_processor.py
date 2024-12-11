@@ -2,6 +2,7 @@ import os
 import json
 from groq import Groq
 from typing import Dict, List, Optional
+from .vocab_check import analyze_vocabulary
 
 class FeedbackProcessor:
     def __init__(self):
@@ -154,13 +155,15 @@ class FeedbackProcessor:
 
     async def analyze_text(self, text: str) -> Dict:
         """
-        Analyze text for both grammar and pronunciation.
+        Analyze text for grammar, pronunciation, and vocabulary.
         """
         grammar_analysis = await self.analyze_grammar(text)
         pronunciation_analysis = await self.analyze_pronunciation(text)
+        vocabulary_analysis = analyze_vocabulary(text)
 
         return {
             "grammar": grammar_analysis,
             "pronunciation": pronunciation_analysis,
+            "vocabulary": vocabulary_analysis,
             "text": text
         }
