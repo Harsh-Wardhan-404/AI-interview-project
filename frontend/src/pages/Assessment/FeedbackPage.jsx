@@ -83,6 +83,7 @@ const FeedbackPage = () => {
       acc.totalPronunciationErrors += questionFeedback.pronunciation.error_count;
       if (questionFeedback.fluency) {
         acc.totalFluencyScore += questionFeedback.fluency.fluency_score;
+        acc.totalFillerWords += questionFeedback.fluency.filler_word_count;
         acc.fluencyCount += 1;
       }
       if (questionFeedback.vocabulary) {
@@ -100,6 +101,7 @@ const FeedbackPage = () => {
     totalGrammarErrors: 0, 
     totalPronunciationErrors: 0,
     totalFluencyScore: 0,
+    totalFillerWords: 0,
     fluencyCount: 0,
     totalVocabularyScore: 0,
     totalAdvancedWords: 0,
@@ -160,134 +162,134 @@ const FeedbackPage = () => {
         Assessment Feedback
       </motion.h1>
       
-      {/* Overall Feedback Section */}
+      {/* Overall Performance Section */}
       <motion.div 
-  initial={{ y: 20, opacity: 0 }}
-  animate={{ y: 0, opacity: 1 }}
-  transition={{ delay: 0.2 }}
-  className="bg-white rounded-lg shadow-md p-6 mb-6 hover:shadow-lg transition-shadow duration-300"
->
-  <h2 className="text-2xl font-semibold mb-4">Overall Performance</h2>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-    {/* Overall Score - Left Side */}
-    <motion.div 
-      className="flex flex-col items-center justify-center"
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 300 }}
-    >
-      <div className="relative w-48 h-48">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
-              className="text-5xl font-bold text-brand-blue"
-            >
-              {overallScore}
-              <div className="text-sm text-gray-500 mt-1">out of 100</div>
-            </motion.div>
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="bg-white rounded-lg shadow-md p-6 mb-6 hover:shadow-lg transition-shadow duration-300"
+      >
+        <h2 className="text-2xl font-semibold mb-4">Overall Performance</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Overall Score - Left Side */}
+          <motion.div 
+            className="flex flex-col items-center justify-center"
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div className="relative w-48 h-48">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
+                    className="text-5xl font-bold text-brand-blue"
+                  >
+                    {overallScore}
+                    <div className="text-sm text-gray-500 mt-1">out of 100</div>
+                  </motion.div>
+                </div>
+              </div>
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  className="text-gray-200"
+                  strokeWidth="8"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="70"
+                  cx="96"
+                  cy="96"
+                />
+                <motion.circle
+                  initial={{ strokeDashoffset: 440 }}
+                  animate={{ strokeDashoffset: 440 - (440 * overallScore) / 100 }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                  className="text-brand-blue"
+                  strokeWidth="8"
+                  strokeDasharray={440}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="70"
+                  cx="96"
+                  cy="96"
+                />
+              </svg>
+            </div>
+            <div className="mt-4 text-center">
+              <div className="text-lg font-medium text-brand-purple mb-2">
+                {getScoreGrade(overallScore)}
+              </div>
+              <p className="text-sm text-gray-600">
+                Based on Grammar, Pronunciation, Fluency, Vocabulary, and Answer Correctness
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Performance Metrics - Right Side */}
+          <div className="space-y-4">
+            {[
+              { label: 'Grammar', performance: grammarPerformance, count: overallStats.totalGrammarErrors, unit: 'mistakes' },
+              { label: 'Pronunciation', performance: pronunciationPerformance, count: overallStats.totalPronunciationErrors, unit: 'challenges' },
+              { label: 'Fluency', performance: fluencyPerformance, count: overallStats.totalFillerWords, unit: 'filler words' },
+              { label: 'Vocabulary', performance: vocabularyPerformance, count: overallStats.totalAdvancedWords, unit: 'advanced words used' },
+              { label: 'Answer Correctness', performance: correctnessPerformance, text: 'Based on relevance and completeness' }
+            ].map((metric, index) => (
+              <motion.div 
+                key={metric.label}
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: index * 0.1 + 0.3 }}
+                className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300"
+              >
+                <div className="flex justify-between items-center mb-1.5">
+                  <h3 className="text-sm font-medium text-gray-800">{metric.label}</h3>
+                  <span className="text-xs font-medium text-brand-blue">
+                    {metric.performance.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${metric.performance}%` }}
+                    transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
+                    className={`h-full ${getHealthBarColor(metric.performance)} transition-all duration-500`}
+                  />
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  {metric.count !== undefined ? `${metric.count} ${metric.unit}` : metric.text}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
-        <svg className="w-full h-full transform -rotate-90">
-          <circle
-            className="text-gray-200"
-            strokeWidth="8"
-            stroke="currentColor"
-            fill="transparent"
-            r="70"
-            cx="96"
-            cy="96"
-          />
-          <motion.circle
-            initial={{ strokeDashoffset: 440 }}
-            animate={{ strokeDashoffset: 440 - (440 * overallScore) / 100 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="text-brand-blue"
-            strokeWidth="8"
-            strokeDasharray={440}
-            strokeLinecap="round"
-            stroke="currentColor"
-            fill="transparent"
-            r="70"
-            cx="96"
-            cy="96"
-          />
-        </svg>
-      </div>
-      <div className="mt-4 text-center">
-        <div className="text-lg font-medium text-brand-purple mb-2">
-          {getScoreGrade(overallScore)}
-        </div>
-        <p className="text-sm text-gray-600">
-          Based on Grammar, Pronunciation, Fluency, Vocabulary, and Answer Correctness
-        </p>
-      </div>
-    </motion.div>
 
-    {/* Performance Metrics - Right Side */}
-    <div className="space-y-4">
-      {[
-        { label: 'Grammar', performance: grammarPerformance, count: overallStats.totalGrammarErrors, unit: 'mistakes' },
-        { label: 'Pronunciation', performance: pronunciationPerformance, count: overallStats.totalPronunciationErrors, unit: 'challenges' },
-        { label: 'Fluency', performance: fluencyPerformance, text: 'Speech flow analysis' },
-        { label: 'Vocabulary', performance: vocabularyPerformance, count: overallStats.totalAdvancedWords, unit: 'advanced words used' },
-        { label: 'Answer Correctness', performance: correctnessPerformance, text: 'Based on relevance and word count' }
-      ].map((metric, index) => (
-        <motion.div 
-          key={metric.label}
-          initial={{ x: 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: index * 0.1 + 0.3 }}
-          className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300"
+        <motion.button
+          whileHover={{ scale: 1.02, boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setShowDetailedFeedback(!showDetailedFeedback)}
+          className="w-full mt-6 px-6 py-3 bg-white border-2 border-brand-blue text-brand-blue rounded-lg 
+          hover:bg-brand-blue hover:text-white transition-all duration-300 text-sm font-medium 
+          shadow-sm hover:shadow-md flex items-center justify-center gap-2"
         >
-          <div className="flex justify-between items-center mb-1.5">
-            <h3 className="text-sm font-medium text-gray-800">{metric.label}</h3>
-            <span className="text-xs font-medium text-brand-blue">
-              {metric.performance.toFixed(1)}%
-            </span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${metric.performance}%` }}
-              transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
-              className={`h-full ${getHealthBarColor(metric.performance)} transition-all duration-500`}
-            />
-          </div>
-          <p className="text-xs text-gray-600 mt-1">
-            {metric.count !== undefined ? `${metric.count} ${metric.unit}` : metric.text}
-          </p>
-        </motion.div>
-      ))}
-    </div>
-  </div>
-
-  <motion.button
-    whileHover={{ scale: 1.02, boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}
-    whileTap={{ scale: 0.98 }}
-    onClick={() => setShowDetailedFeedback(!showDetailedFeedback)}
-    className="w-full mt-6 px-6 py-3 bg-white border-2 border-brand-blue text-brand-blue rounded-lg 
-    hover:bg-brand-blue hover:text-white transition-all duration-300 text-sm font-medium 
-    shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-  >
-    {showDetailedFeedback ? (
-      <>
-        <span>Hide Detailed Feedback</span>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
-      </>
-    ) : (
-      <>
-        <span>Show Detailed Feedback</span>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </>
-    )}
-  </motion.button>
-</motion.div>
+          {showDetailedFeedback ? (
+            <>
+              <span>Hide Detailed Feedback</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </>
+          ) : (
+            <>
+              <span>Show Detailed Feedback</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </>
+          )}
+        </motion.button>
+      </motion.div>
 
       {/* Detailed Feedback Section */}
       <AnimatePresence>
@@ -435,8 +437,9 @@ const FeedbackPage = () => {
                           title: 'Fluency Assessment',
                           content: assessmentData.feedback[index].fluency,
                           score: assessmentData.feedback[index].fluency?.fluency_score,
-                          pauseCount: assessmentData.feedback[index].fluency?.pause_count,
-                          pauseDetails: assessmentData.feedback[index].fluency?.pause_details,
+                          fillerCount: assessmentData.feedback[index].fluency?.filler_word_count,
+                          fillerWords: assessmentData.feedback[index].fluency?.filler_words,
+                          feedback: assessmentData.feedback[index].fluency?.feedback,
                           bgColor: 'bg-blue-100',
                           textColor: 'text-brand-blue'
                         },
@@ -497,32 +500,41 @@ const FeedbackPage = () => {
                               </ul>
                             )}
                             
-                            {section.pauseCount > 0 && (
-                              <div className="mt-2">
+                            {/* Fluency-specific content */}
+                            {section.title === 'Fluency Assessment' && section.fillerWords && (
+                              <div className="mt-2 space-y-3">
                                 <p className="text-sm text-gray-700">
-                                  Detected {section.pauseCount} significant pauses
+                                  Detected {section.fillerCount} filler words or hesitations
                                 </p>
-                                <ul className="list-disc pl-5 space-y-2 mt-2">
-                                  {section.pauseDetails.map((pause, i) => (
-                                    <motion.li
+                                {section.feedback && (
+                                  <p className="text-sm text-gray-600 italic">
+                                    {section.feedback}
+                                  </p>
+                                )}
+                                <div className="space-y-2">
+                                  {section.fillerWords.map((filler, i) => (
+                                    <motion.div
                                       key={i}
                                       initial={{ opacity: 0, x: -20 }}
                                       animate={{ opacity: 1, x: 0 }}
                                       transition={{ delay: i * 0.05 }}
-                                      className="text-xs text-gray-600"
+                                      className="text-sm bg-blue-50 p-2 rounded"
                                     >
-                                      {pause.duration}s pause between "{pause.word_before}" and "{pause.word_after}"
-                                    </motion.li>
+                                      <span className="font-medium text-brand-blue">
+                                        "{filler.word}"
+                                      </span>
+                                      <p className="text-xs text-gray-600 mt-1">
+                                        Context: "...{filler.context}..."
+                                      </p>
+                                    </motion.div>
                                   ))}
-                                </ul>
+                                </div>
                               </div>
                             )}
                             
-                            {section.advancedWords && (
+                            {/* Vocabulary-specific content */}
+                            {section.title === 'Vocabulary Assessment' && section.advancedWords && (
                               <div className="mt-2">
-                                <p className="text-sm text-gray-700">
-                                  Used {section.advancedWords.length} advanced words
-                                </p>
                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                   {section.advancedWords.map((word, i) => (
                                     <motion.span
@@ -536,13 +548,12 @@ const FeedbackPage = () => {
                                     </motion.span>
                                   ))}
                                 </div>
+                                {section.feedback && (
+                                  <p className="text-xs text-gray-600 mt-2">
+                                    {section.feedback}
+                                  </p>
+                                )}
                               </div>
-                            )}
-                            
-                            {section.feedback && (
-                              <p className="text-xs text-gray-600 mt-2">
-                                {section.feedback}
-                              </p>
                             )}
                           </motion.div>
                         )

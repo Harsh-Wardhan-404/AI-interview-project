@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-from feedback.pause_count import process_audio_fluency
+# from feedback.pause_count import process_audio_fluency
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,20 +37,17 @@ async def process_audio_file(file_path: str, language: str = "en") -> dict:
             transcription = client.audio.transcriptions.create(
                 file=(os.path.basename(file_path), file.read()),
                 model="whisper-large-v3-turbo",
+                prompt="no word correction and include words like 'hmm', 'um', 'uh', 'aaa', 'aa', 'mmm', 'mm', 'ah', 'er', 'erm', 'uhm', 'uhmm', 'uhhuh', 'uhuh'",
                 response_format="json",
                 language=language,
                 temperature=0.0
             )
 
-        # Process fluency
-        fluency_analysis = process_audio_fluency(file_path)
 
-        logger.info(f"Successfully transcribed and analyzed audio file: {file_path}")
         return {
             "status": "success",
             "text": transcription.text,
             "filename": os.path.basename(file_path),
-            "fluency": fluency_analysis
         }
 
     except Exception as e:
