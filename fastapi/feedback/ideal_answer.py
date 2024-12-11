@@ -28,14 +28,14 @@ class IdealAnswerGenerator:
             User's Answer: {user_answer}
             
             Please provide:
-            1. An ideal answer to this question
+            1. A corrected gramatical answer to this question
             2. Analysis of what the user did well
             3. Areas where the user's answer could be improved
             4. Specific suggestions for improvement
             
             Format the response as a JSON with the following structure:
             {{
-                "ideal_answer": "the ideal answer",
+                "ideal_answer": "corrected gramatical answer",
                 "user_strengths": "what the user did well",
                 "areas_for_improvement": "where the answer could be improved",
                 "improvement_suggestions": "specific suggestions"
