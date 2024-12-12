@@ -1,21 +1,20 @@
 // src/components/Feedback/DetailedFeedback/index.jsx
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuestionCard from './QuestionCard';
 
-const DetailedFeedback = ({ 
-  showDetailedFeedback, 
+const DetailedFeedback = ({
+  showDetailedFeedback,
   assessmentData,
   expandedQuestion,
   setExpandedQuestion,
   handleGetIdealAnswer,
   loadingIdealAnswer,
-  idealAnswers 
+  idealAnswers
 }) => {
   return (
     <AnimatePresence>
       {showDetailedFeedback && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}

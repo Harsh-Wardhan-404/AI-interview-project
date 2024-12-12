@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getIdealAnswer } from '../../services/api';
@@ -22,7 +22,7 @@ const FeedbackPage = () => {
     try {
       setLoadingIdealAnswer(prev => ({ ...prev, [index]: true }));
       const result = await getIdealAnswer(question, answer);
-      
+
       let parsedData;
       try {
         parsedData = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
@@ -58,13 +58,13 @@ const FeedbackPage = () => {
 
   if (!assessmentData) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="container mx-auto p-6 text-center"
       >
         <p>No feedback data available.</p>
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/dashboard')}
@@ -97,8 +97,8 @@ const FeedbackPage = () => {
       }
     }
     return acc;
-  }, { 
-    totalGrammarErrors: 0, 
+  }, {
+    totalGrammarErrors: 0,
     totalPronunciationErrors: 0,
     totalFluencyScore: 0,
     totalFillerWords: 0,
@@ -111,12 +111,12 @@ const FeedbackPage = () => {
   });
 
   const totalQuestions = assessmentData.questions.length;
-  
+
   // Calculate performance percentages
   const grammarPerformance = Math.max(0, Math.min(100, 100 - (overallStats.totalGrammarErrors / totalQuestions * 20)));
   const pronunciationPerformance = Math.max(0, Math.min(100, 100 - (overallStats.totalPronunciationErrors / totalQuestions * 20)));
-  const fluencyPerformance = overallStats.fluencyCount > 0 
-    ? overallStats.totalFluencyScore / overallStats.fluencyCount 
+  const fluencyPerformance = overallStats.fluencyCount > 0
+    ? overallStats.totalFluencyScore / overallStats.fluencyCount
     : 100;
   const vocabularyPerformance = overallStats.vocabularyCount > 0
     ? overallStats.totalVocabularyScore / overallStats.vocabularyCount
@@ -149,21 +149,21 @@ const FeedbackPage = () => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="container mx-auto p-6"
     >
-      <motion.h1 
+      <motion.h1
         initial={{ y: -20 }}
         animate={{ y: 0 }}
         className="text-3xl font-bold mb-6"
       >
         Assessment Feedback
       </motion.h1>
-      
+
       {/* Overall Performance Section */}
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -172,7 +172,7 @@ const FeedbackPage = () => {
         <h2 className="text-2xl font-semibold mb-4">Overall Performance</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Overall Score - Left Side */}
-          <motion.div 
+          <motion.div
             className="flex flex-col items-center justify-center"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -180,7 +180,7 @@ const FeedbackPage = () => {
             <div className="relative w-48 h-48">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <motion.div 
+                  <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
@@ -236,7 +236,7 @@ const FeedbackPage = () => {
               { label: 'Vocabulary', performance: vocabularyPerformance, count: overallStats.totalAdvancedWords, unit: 'advanced words used' },
               { label: 'Answer Correctness', performance: correctnessPerformance, text: 'Based on relevance and completeness' }
             ].map((metric, index) => (
-              <motion.div 
+              <motion.div
                 key={metric.label}
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -250,7 +250,7 @@ const FeedbackPage = () => {
                   </span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${metric.performance}%` }}
                     transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
@@ -294,14 +294,14 @@ const FeedbackPage = () => {
       {/* Detailed Feedback Section */}
       <AnimatePresence>
         {showDetailedFeedback && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="space-y-6"
           >
             {assessmentData.questions.map((question, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -334,14 +334,14 @@ const FeedbackPage = () => {
                     >
                       {/* Video Player Section */}
                       {assessmentData.feedback[index].videoUrl && (
-                        <motion.div 
+                        <motion.div
                           initial={{ scale: 0.95 }}
                           animate={{ scale: 1 }}
                           className="bg-gray-50 p-4 rounded-lg"
                         >
                           <h3 className="font-semibold text-sm mb-2">Your Response Video</h3>
                           <div className="aspect-video w-full max-w-2xl mx-auto bg-black rounded-lg overflow-hidden shadow-lg">
-                            <video 
+                            <video
                               src={assessmentData.feedback[index].videoUrl}
                               controls
                               className="w-full h-full object-contain"
@@ -474,7 +474,7 @@ const FeedbackPage = () => {
                                 </span>
                               )}
                             </div>
-                            
+
                             {/* Section specific content */}
                             {section.errors && (
                               <ul className="list-disc pl-5 space-y-2">
@@ -499,7 +499,7 @@ const FeedbackPage = () => {
                                 ))}
                               </ul>
                             )}
-                            
+
                             {/* Fluency-specific content */}
                             {section.title === 'Fluency Assessment' && section.fillerWords && (
                               <div className="mt-2 space-y-3">
@@ -531,7 +531,7 @@ const FeedbackPage = () => {
                                 </div>
                               </div>
                             )}
-                            
+
                             {/* Vocabulary-specific content */}
                             {section.title === 'Vocabulary Assessment' && section.advancedWords && (
                               <div className="mt-2">
@@ -567,13 +567,13 @@ const FeedbackPage = () => {
         )}
       </AnimatePresence>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
         className="mt-8 flex justify-center"
       >
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/dashboard')}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getIdealAnswer } from '../../services/api';
@@ -27,7 +27,7 @@ const FeedbackPage = () => {
     try {
       setLoadingIdealAnswer(prev => ({ ...prev, [index]: true }));
       const result = await getIdealAnswer(question, answer);
-      
+
       let parsedData;
       try {
         parsedData = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
@@ -65,12 +65,12 @@ const FeedbackPage = () => {
     try {
       setIsSaving(true);
       setUploadProgress(0);
-  
+
       const savedAssessment = await saveAssessment(
-        assessmentData, 
+        assessmentData,
         (progress) => setUploadProgress(progress)
       );
-  
+
       console.log("Assessment data ready to save:", savedAssessment);
       alert("Assessment saved successfully!");
     } catch (error) {
@@ -84,13 +84,13 @@ const FeedbackPage = () => {
 
   if (!assessmentData) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="container mx-auto p-6 text-center"
       >
         <p>No feedback data available.</p>
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/dashboard')}
@@ -105,30 +105,35 @@ const FeedbackPage = () => {
   // Calculate overall statistics and performance percentages
   const overallStats = assessmentData.feedback.reduce((acc, questionFeedback) => {
     if (questionFeedback) {
-      acc.totalGrammarErrors += questionFeedback.grammar.error_count;
-      acc.totalPronunciationErrors += questionFeedback.pronunciation.error_count;
+      // Add null checks for each property
+      acc.totalGrammarErrors += questionFeedback.grammar?.error_count || 0;
+      acc.totalPronunciationErrors += questionFeedback.pronunciation?.error_count || 0;
+
       if (questionFeedback.fluency) {
-        acc.totalFluencyScore += questionFeedback.fluency.fluency_score;
-        acc.totalFillerWords += questionFeedback.fluency.filler_word_count;
+        acc.totalFluencyScore += questionFeedback.fluency.fluency_score || 0;
+        acc.totalFillerWords += questionFeedback.fluency.filler_word_count || 0;
         acc.fluencyCount += 1;
       }
+
       if (questionFeedback.vocabulary) {
-        acc.totalVocabularyScore += questionFeedback.vocabulary.vocabulary_score;
-        acc.totalAdvancedWords += questionFeedback.vocabulary.total_advanced_words;
+        acc.totalVocabularyScore += questionFeedback.vocabulary.vocabulary_score || 0;
+        acc.totalAdvancedWords += questionFeedback.vocabulary.total_advanced_words || 0;
         acc.vocabularyCount += 1;
       }
+
       if (questionFeedback.correctness) {
-        acc.totalCorrectnessScore += questionFeedback.correctness.score;
+        acc.totalCorrectnessScore += questionFeedback.correctness.score || 0;
         acc.correctnessCount += 1;
       }
+
       if (questionFeedback.pause_count !== undefined) {
         acc.totalPauses += questionFeedback.pause_count;
         acc.pauseCount += 1;
       }
     }
     return acc;
-  }, { 
-    totalGrammarErrors: 0, 
+  }, {
+    totalGrammarErrors: 0,
     totalPronunciationErrors: 0,
     totalFluencyScore: 0,
     totalFillerWords: 0,
@@ -144,12 +149,12 @@ const FeedbackPage = () => {
   });
 
   const totalQuestions = assessmentData.questions.length;
-  
+
   // Calculate performance percentages
   const grammarPerformance = Math.max(0, Math.min(100, 100 - (overallStats.totalGrammarErrors / totalQuestions * 20)));
   const pronunciationPerformance = Math.max(0, Math.min(100, 100 - (overallStats.totalPronunciationErrors / totalQuestions * 20)));
-  const fluencyPerformance = overallStats.fluencyCount > 0 
-    ? overallStats.totalFluencyScore / overallStats.fluencyCount 
+  const fluencyPerformance = overallStats.fluencyCount > 0
+    ? overallStats.totalFluencyScore / overallStats.fluencyCount
     : 100;
   const vocabularyPerformance = overallStats.vocabularyCount > 0
     ? overallStats.totalVocabularyScore / overallStats.vocabularyCount
@@ -171,19 +176,19 @@ const FeedbackPage = () => {
   );
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="container mx-auto p-6"
     >
-      <motion.h1 
+      <motion.h1
         initial={{ y: -20 }}
         animate={{ y: 0 }}
         className="text-3xl font-bold mb-6"
       >
         Assessment Feedback
       </motion.h1>
-      
+
       {/* Overall Performance Section */}
       <OverallPerformance
         overallScore={overallScore}
@@ -199,7 +204,7 @@ const FeedbackPage = () => {
       />
 
       {/* Detailed Feedback Section */}
-      <DetailedFeedback 
+      <DetailedFeedback
         showDetailedFeedback={showDetailedFeedback}
         assessmentData={assessmentData}
         expandedQuestion={expandedQuestion}
@@ -210,13 +215,13 @@ const FeedbackPage = () => {
       />
 
       {/* Save Assessment Button */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
         className="mt-8 flex flex-col items-center gap-4"
       >
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleSaveAssessment}
@@ -238,14 +243,14 @@ const FeedbackPage = () => {
 
         {uploadProgress > 0 && uploadProgress < 100 && (
           <div className="w-full max-w-md bg-gray-200 rounded-full h-2.5">
-            <div 
+            <div
               className="bg-green-600 h-2.5 rounded-full transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             ></div>
           </div>
         )}
 
-        <motion.button 
+        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate('/dashboard')}

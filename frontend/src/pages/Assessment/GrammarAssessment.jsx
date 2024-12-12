@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -68,7 +68,7 @@ function GrammarAssessment() {
     try {
       const result = await sendMediaToServer(mediaBlob, currentQuestionIndex);
       setTranscribedText(result.transcribedText);
-      
+
       // Create a URL for the video blob
       const videoUrl = URL.createObjectURL(mediaBlob);
       setVideoUrls(prev => {
@@ -132,8 +132,8 @@ function GrammarAssessment() {
 
       mediaRecorderRef.current.onstop = async () => {
         stream.getTracks().forEach((track) => track.stop());
-        const mediaBlob = new Blob(chunksRef.current, { 
-          type: mediaRecorderRef.current.mimeType 
+        const mediaBlob = new Blob(chunksRef.current, {
+          type: mediaRecorderRef.current.mimeType
         });
 
         try {
@@ -298,7 +298,7 @@ function GrammarAssessment() {
           formatTime={formatTime}
           MAX_RECORDING_TIME={MAX_RECORDING_TIME}
         />
-        
+
         <VideoPreview videoRef={videoRef} isRecording={isRecording} />
       </motion.div>
 

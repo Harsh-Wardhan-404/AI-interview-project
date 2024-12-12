@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera } from "lucide-react"; // Add this import
 
@@ -37,7 +37,7 @@ const VideoPreview = ({ videoRef, isRecording }) => {
             className="w-full h-full object-cover"
           />
           {!videoRef.current?.srcObject && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="absolute inset-0 flex flex-col items-center justify-center text-gray-400"

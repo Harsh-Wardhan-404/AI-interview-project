@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -134,7 +133,7 @@ function Dashboard() {
               <p className="mt-2 text-gray-600 leading-relaxed">
                 {assessment.description}
               </p>
-              
+
               {/* Stats Section */}
               {/* <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">

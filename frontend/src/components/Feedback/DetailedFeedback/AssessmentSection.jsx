@@ -1,5 +1,4 @@
 // src/components/Feedback/DetailedFeedback/AssessmentSection.jsx
-import React from 'react';
 import { motion } from 'framer-motion';
 
 const AssessmentSection = ({ feedback }) => {
@@ -139,18 +138,18 @@ const AssessmentSection = ({ feedback }) => {
         Detected {section.count} pauses in your speech
       </p>
       <p className="text-xs text-gray-600 mt-2">
-        {section.count > 8 
+        {section.count > 8
           ? 'Consider reducing the number of pauses to improve speech fluency'
           : section.count > 4
-          ? 'Moderate number of pauses - your speech flow is acceptable'
-          : 'Good speech flow with minimal pauses'}
+            ? 'Moderate number of pauses - your speech flow is acceptable'
+            : 'Good speech flow with minimal pauses'}
       </p>
     </div>
   );
 
   return (
     <div className="space-y-4">
-      {sections.map((section, index) => 
+      {sections.map((section, index) =>
         section.content && (
           <motion.div
             key={index}

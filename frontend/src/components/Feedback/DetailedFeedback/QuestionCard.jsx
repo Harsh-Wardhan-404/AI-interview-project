@@ -1,5 +1,5 @@
 // src/components/Feedback/DetailedFeedback/QuestionCard.jsx
-import React from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import VideoPlayer from './VideoPlayer';
 import IdealAnswerSection from './IdealAnswerSection';
@@ -16,7 +16,7 @@ const QuestionCard = ({
   idealAnswer
 }) => {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
@@ -49,12 +49,12 @@ const QuestionCard = ({
             className="px-6 pb-6 space-y-4"
           >
             <VideoPlayer videoUrl={feedback.videoUrl} />
-            
+
             <div className="text-gray-600">
               Your answer: {feedback.text}
             </div>
 
-            <IdealAnswerSection 
+            <IdealAnswerSection
               question={question}
               answer={feedback.text}
               index={index}

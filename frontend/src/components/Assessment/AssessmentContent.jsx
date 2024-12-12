@@ -1,10 +1,10 @@
-import React from 'react';
+
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, ArrowLeft, Volume2, Video, VideoOff, Clock, Target, BookOpen, Star, XCircle, Loader, FileText, ChevronRight} from "lucide-react";
+import { CheckCircle, ArrowLeft, Volume2, Video, VideoOff, Clock, Target, BookOpen, Star, XCircle, Loader, FileText, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import WaveformVisualizer from "./WaveformVisualizer";
 
-function AssessmentContent({currentQuestionIndex,questions,isRecording,startRecording,stopRecording,transcribedText,error,recordingDuration,mediaStream,resetAssessment,nextQuestion,viewFeedback,isAssessmentComplete,formatTime,MAX_RECORDING_TIME}) {
+function AssessmentContent({ currentQuestionIndex, questions, isRecording, startRecording, stopRecording, transcribedText, error, recordingDuration, mediaStream, resetAssessment, nextQuestion, viewFeedback, isAssessmentComplete, formatTime, MAX_RECORDING_TIME }) {
   const navigate = useNavigate();
   const questionIcons = [
     <Clock key="clock" className="text-brand-blue" size={24} />,

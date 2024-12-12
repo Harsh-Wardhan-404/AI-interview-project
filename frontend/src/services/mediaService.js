@@ -1,51 +1,83 @@
+import { api, fastApi, uploadToS3, processMedia, analyzeText } from './api';
+
+/**
+ * Handles the complete media processing pipeline:
+ * 1. Uploads video to S3
+ * 2. Processes the audio for transcription
+ * 3. Analyzes the transcribed text
+ */
 export const sendMediaToServer = async (mediaBlob, questionIndex) => {
   if (!mediaBlob || mediaBlob.size === 0) {
     throw new Error("No recording data available");
   }
 
-  const formData = new FormData();
-  formData.append(
-    "file",
-    mediaBlob,
-    `question_${questionIndex}.mp4`
-  );
-  formData.append("questionIndex", questionIndex);
+  try {
+    // First upload to S3
+    const s3Response = await uploadToS3(mediaBlob, questionIndex);
+    console.log("Video uploaded to S3:", s3Response.url);
 
-  const response = await fetch("http://localhost:8000/process-audio", {
-    method: "POST",
-    body: formData,
-  });
+    // Then process the audio
+    const processResponse = await processMedia(mediaBlob, questionIndex);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Upload failed: ${errorText || response.statusText}`);
-  }
+    if (processResponse.status === "success" && processResponse.text) {
+      // Get feedback analysis
+      const feedbackData = await analyzeText(processResponse.text);
 
-  const data = await response.json();
-  
-  if (data.status === "success" && data.text) {
-    const feedbackData = await getFeedbackAnalysis(data.text);
-    return {
-      transcribedText: data.text,
-      feedback: feedbackData
-    };
-  } else {
-    throw new Error(data.message || "Failed to transcribe audio");
+      return {
+        transcribedText: processResponse.text,
+        feedback: feedbackData,
+        videoUrl: s3Response.url
+      };
+    } else {
+      throw new Error(processResponse.message || "Failed to transcribe audio");
+    }
+  } catch (error) {
+    console.error("Media processing error:", error);
+    throw new Error(error.message || "Failed to process recording");
   }
 };
 
+/**
+ * Gets feedback analysis for transcribed text
+ */
 export const getFeedbackAnalysis = async (text) => {
-  const response = await fetch("http://localhost:8000/analyze-text", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ text }),
-  });
-
-  if (!response.ok) {
+  try {
+    return await analyzeText(text);
+  } catch (error) {
+    console.error("Feedback analysis error:", error);
     throw new Error("Failed to get feedback analysis");
   }
+};
 
-  return await response.json();
+/**
+ * Uploads a video file directly to S3
+ */
+export const uploadVideo = async (file, questionIndex) => {
+  try {
+    const response = await uploadToS3(file, questionIndex);
+    return response;
+  } catch (error) {
+    console.error("Video upload error:", error);
+    throw new Error("Failed to upload video");
+  }
+};
+
+/**
+ * Processes audio for transcription
+ */
+export const processAudio = async (file, questionIndex) => {
+  try {
+    const response = await processMedia(file, questionIndex);
+    return response;
+  } catch (error) {
+    console.error("Audio processing error:", error);
+    throw new Error("Failed to process audio");
+  }
+};
+
+export default {
+  sendMediaToServer,
+  getFeedbackAnalysis,
+  uploadVideo,
+  processAudio
 };

@@ -1,5 +1,5 @@
 // frontend/src/components/pages/Home.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserCircle, Video, Brain, FileText, ChevronRight } from "lucide-react";
 

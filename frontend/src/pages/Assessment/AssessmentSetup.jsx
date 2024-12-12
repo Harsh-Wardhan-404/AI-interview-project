@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Settings,
@@ -108,14 +108,14 @@ function AssessmentSetup() {
                     type="button"
                     onClick={() => handleInputChange('questionType', type.id)}
                     className={`p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg ${formData.questionType === type.id
-                        ? 'border-brand-blue bg-brand-blue/5 shadow-lg'
-                        : 'border-gray-100 hover:border-brand-blue/50 shadow'
+                      ? 'border-brand-blue bg-brand-blue/5 shadow-lg'
+                      : 'border-gray-100 hover:border-brand-blue/50 shadow'
                       }`}
                   >
                     <type.icon
                       className={`w-8 h-8 mb-3 ${formData.questionType === type.id
-                          ? 'text-brand-blue'
-                          : 'text-gray-400'
+                        ? 'text-brand-blue'
+                        : 'text-gray-400'
                         }`}
                     />
                     <span className="block text-base font-semibold mb-2">
@@ -149,7 +149,7 @@ function AssessmentSetup() {
                 <input
                   type="range"
                   min="1"
-                  max="7" 
+                  max="7"
                   value={formData.numberOfQuestions}
                   onChange={(e) =>
                     handleInputChange('numberOfQuestions', parseInt(e.target.value))
@@ -177,8 +177,8 @@ function AssessmentSetup() {
                     type="button"
                     onClick={() => handleInputChange('topic', topic.id)}
                     className={`p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${formData.topic === topic.id
-                        ? 'border-brand-purple bg-brand-purple/5 text-brand-purple shadow-lg'
-                        : 'border-gray-100 text-gray-600 hover:border-brand-purple/50 shadow hover:shadow-lg'
+                      ? 'border-brand-purple bg-brand-purple/5 text-brand-purple shadow-lg'
+                      : 'border-gray-100 text-gray-600 hover:border-brand-purple/50 shadow hover:shadow-lg'
                       }`}
                   >
                     <topic.icon className={`w-6 h-6 mb-2 mx-auto ${formData.topic === topic.id ? 'text-brand-purple' : 'text-gray-400'
@@ -212,8 +212,8 @@ function AssessmentSetup() {
                     type="button"
                     onClick={() => handleInputChange('difficulty', level.id)}
                     className={`group p-6 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${formData.difficulty === level.id
-                        ? `${level.color} border-transparent text-white shadow-lg`
-                        : 'border-gray-100 text-gray-600 hover:shadow-lg'
+                      ? `${level.color} border-transparent text-white shadow-lg`
+                      : 'border-gray-100 text-gray-600 hover:shadow-lg'
                       }`}
                   >
                     <level.icon className={`w-6 h-6 mb-2 mx-auto ${formData.difficulty === level.id ? 'text-white' : 'text-gray-400 group-hover:text-gray-600'
