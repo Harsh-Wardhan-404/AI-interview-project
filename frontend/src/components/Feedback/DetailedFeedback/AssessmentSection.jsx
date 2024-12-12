@@ -10,7 +10,8 @@ const AssessmentSection = ({ feedback }) => {
       score: feedback.correctness?.score,
       feedback: feedback.correctness?.detailed_feedback,
       bgColor: 'bg-blue-100',
-      textColor: 'text-brand-blue'
+      textColor: 'text-brand-blue',
+      showScore: true
     },
     {
       title: 'Grammar Assessment',
@@ -18,7 +19,8 @@ const AssessmentSection = ({ feedback }) => {
       errorCount: feedback.grammar.error_count,
       errors: feedback.grammar.errors,
       bgColor: 'bg-red-100',
-      textColor: 'text-brand-red'
+      textColor: 'text-brand-red',
+      showScore: false
     },
     {
       title: 'Pronunciation Assessment',
@@ -26,7 +28,8 @@ const AssessmentSection = ({ feedback }) => {
       errorCount: feedback.pronunciation.error_count,
       errors: feedback.pronunciation.errors,
       bgColor: 'bg-purple-100',
-      textColor: 'text-brand-purple'
+      textColor: 'text-brand-purple',
+      showScore: false
     },
     {
       title: 'Fluency Assessment',
@@ -36,23 +39,25 @@ const AssessmentSection = ({ feedback }) => {
       fillerWords: feedback.fluency?.filler_words,
       feedback: feedback.fluency?.feedback,
       bgColor: 'bg-blue-100',
-      textColor: 'text-brand-blue'
+      textColor: 'text-brand-blue',
+      showScore: true
     },
     {
       title: 'Speech Pauses',
       content: feedback.pause_count !== undefined,
       count: feedback.pause_count,
       bgColor: 'bg-yellow-100',
-      textColor: 'text-yellow-700'
+      textColor: 'text-yellow-700',
+      showScore: false
     },
     {
       title: 'Vocabulary Assessment',
       content: feedback.vocabulary,
-      score: feedback.vocabulary?.vocabulary_score,
       advancedWords: feedback.vocabulary?.unique_advanced_words,
       feedback: feedback.vocabulary?.feedback,
       bgColor: 'bg-purple-100',
-      textColor: 'text-brand-purple'
+      textColor: 'text-brand-purple',
+      showScore: false
     }
   ];
 
@@ -156,7 +161,7 @@ const AssessmentSection = ({ feedback }) => {
           >
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-sm">{section.title}</h3>
-              {section.score !== undefined && (
+              {section.showScore && section.score !== undefined && (
                 <span className={`${section.bgColor} ${section.textColor} px-2 py-0.5 rounded-full text-xs`}>
                   {section.score}% score
                 </span>

@@ -31,6 +31,64 @@ const OverallPerformance = ({
   // Calculate pause performance (lower pauses is better)
   const pausePerformance = Math.max(0, Math.min(100, 100 - (overallStats.totalPauses / overallStats.totalQuestions * 10)));
 
+  // Calculate overall score with weighted metrics
+  const calculatedOverallScore = Math.round(
+    (grammarPerformance * 0.25) +      // 25% weight for grammar
+    (pronunciationPerformance * 0.20) + // 20% weight for pronunciation
+    (fluencyPerformance * 0.20) +       // 20% weight for fluency
+    (pausePerformance * 0.15) +         // 15% weight for speech pauses
+    (correctnessPerformance * 0.20)     // 20% weight for answer correctness
+  );
+
+  // Define metrics with special handling for vocabulary
+  const metrics = [
+    { 
+      label: 'Grammar', 
+      performance: grammarPerformance, 
+      count: overallStats.totalGrammarErrors, 
+      unit: 'mistakes',
+      showPerformance: true,
+      weight: '25%'
+    },
+    { 
+      label: 'Pronunciation', 
+      performance: pronunciationPerformance, 
+      count: overallStats.totalPronunciationErrors, 
+      unit: 'challenges',
+      showPerformance: true,
+      weight: '20%'
+    },
+    { 
+      label: 'Fluency', 
+      performance: fluencyPerformance, 
+      count: overallStats.totalFillerWords, 
+      unit: 'filler words',
+      showPerformance: true,
+      weight: '20%'
+    },
+    { 
+      label: 'Speech Pauses', 
+      performance: pausePerformance, 
+      count: overallStats.totalPauses, 
+      unit: 'pauses',
+      showPerformance: true,
+      weight: '15%'
+    },
+    { 
+      label: 'Vocabulary', 
+      count: overallStats.totalAdvancedWords, 
+      unit: 'advanced words used',
+      showPerformance: false
+    },
+    { 
+      label: 'Answer Correctness', 
+      performance: correctnessPerformance, 
+      text: 'Based on relevance and completeness',
+      showPerformance: true,
+      weight: '20%'
+    }
+  ];
+
   return (
     <motion.div 
       initial={{ y: 20, opacity: 0 }}
@@ -55,7 +113,7 @@ const OverallPerformance = ({
                   transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
                   className="text-5xl font-bold text-brand-blue"
                 >
-                  {overallScore}
+                  {calculatedOverallScore}
                   <div className="text-sm text-gray-500 mt-1">out of 100</div>
                 </motion.div>
               </div>
@@ -72,7 +130,7 @@ const OverallPerformance = ({
               />
               <motion.circle
                 initial={{ strokeDashoffset: 440 }}
-                animate={{ strokeDashoffset: 440 - (440 * overallScore) / 100 }}
+                animate={{ strokeDashoffset: 440 - (440 * calculatedOverallScore) / 100 }}
                 transition={{ duration: 1, delay: 0.5 }}
                 className="text-brand-blue"
                 strokeWidth="8"
@@ -88,24 +146,17 @@ const OverallPerformance = ({
           </div>
           <div className="mt-4 text-center">
             <div className="text-lg font-medium text-brand-purple mb-2">
-              {getScoreGrade(overallScore)}
+              {getScoreGrade(calculatedOverallScore)}
             </div>
             <p className="text-sm text-gray-600">
-              Based on Grammar, Pronunciation, Fluency, Vocabulary, Speech Pauses, and Answer Correctness
+              Based on Grammar (25%), Pronunciation (20%), Fluency (20%), Speech Pauses (15%), and Answer Correctness (20%)
             </p>
           </div>
         </motion.div>
 
         {/* Performance Metrics - Right Side */}
         <div className="space-y-4">
-          {[
-            { label: 'Grammar', performance: grammarPerformance, count: overallStats.totalGrammarErrors, unit: 'mistakes' },
-            { label: 'Pronunciation', performance: pronunciationPerformance, count: overallStats.totalPronunciationErrors, unit: 'challenges' },
-            { label: 'Fluency', performance: fluencyPerformance, count: overallStats.totalFillerWords, unit: 'filler words' },
-            { label: 'Speech Pauses', performance: pausePerformance, count: overallStats.totalPauses, unit: 'pauses' },
-            { label: 'Vocabulary', performance: vocabularyPerformance, count: overallStats.totalAdvancedWords, unit: 'advanced words used' },
-            { label: 'Answer Correctness', performance: correctnessPerformance, text: 'Based on relevance and completeness' }
-          ].map((metric, index) => (
+          {metrics.map((metric, index) => (
             <motion.div 
               key={metric.label}
               initial={{ x: 50, opacity: 0 }}
@@ -114,19 +165,28 @@ const OverallPerformance = ({
               className="bg-gray-50 p-3 rounded-lg hover:shadow-md transition-shadow duration-300"
             >
               <div className="flex justify-between items-center mb-1.5">
-                <h3 className="text-sm font-medium text-gray-800">{metric.label}</h3>
-                <span className="text-xs font-medium text-brand-blue">
-                  {metric.performance.toFixed(1)}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-medium text-gray-800">{metric.label}</h3>
+                  {metric.weight && (
+                    <span className="text-xs text-gray-500">({metric.weight})</span>
+                  )}
+                </div>
+                {metric.showPerformance && (
+                  <span className="text-xs font-medium text-brand-blue">
+                    {metric.performance.toFixed(1)}%
+                  </span>
+                )}
               </div>
-              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${metric.performance}%` }}
-                  transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
-                  className={`h-full ${getHealthBarColor(metric.performance)} transition-all duration-500`}
-                />
-              </div>
+              {metric.showPerformance && (
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${metric.performance}%` }}
+                    transition={{ duration: 0.8, delay: index * 0.1 + 0.3 }}
+                    className={`h-full ${getHealthBarColor(metric.performance)} transition-all duration-500`}
+                  />
+                </div>
+              )}
               <p className="text-xs text-gray-600 mt-1">
                 {metric.count !== undefined ? `${metric.count} ${metric.unit}` : metric.text}
               </p>
