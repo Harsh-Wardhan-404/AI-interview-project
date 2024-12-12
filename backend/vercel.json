@@ -10,7 +10,14 @@
     {
       "src": "/(.*)",
       "dest": "app.js",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH",
+        "OPTIONS"
+      ],
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization",
@@ -20,11 +27,11 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "MONGODB_URI": "@mongodb_uri",
-    "AWS_ACCESS_KEY_ID": "@aws_access_key_id",
-    "AWS_SECRET_ACCESS_KEY": "@aws_secret_access_key",
-    "AWS_REGION": "@aws_region",
-    "AWS_BUCKET_NAME": "@aws_bucket_name",
-    "JWT_SECRET": "@jwt_secret"
+    "MONGODB_URI": "your_mongodb_uri_here",
+    "AWS_ACCESS_KEY_ID": "your_aws_access_key_here",
+    "AWS_SECRET_ACCESS_KEY": "your_aws_secret_key_here",
+    "AWS_REGION": "your_aws_region_here",
+    "AWS_BUCKET_NAME": "your_bucket_name_here",
+    "JWT_SECRET": "your_jwt_secret_here"
   }
 }
