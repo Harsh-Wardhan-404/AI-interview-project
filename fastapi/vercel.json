@@ -10,17 +10,19 @@
     {
       "src": "/(.*)",
       "dest": "vercel_app.py",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH",
+        "OPTIONS"
+      ],
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS"
       }
     }
-  ],
-  "env": {
-    "PYTHON_VERSION": "3.9",
-    "OPENAI_API_KEY": "@openai_api_key",
-    "MONGODB_URI": "@mongodb_uri"
-  }
+  ]
 }
